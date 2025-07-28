@@ -1,0 +1,37 @@
+{
+  "name": "bloodfinder",
+  "version": "1.0.0",
+  "description": "A modern, location-aware blood donation platform",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm start",
+    "client": "cd frontend && npm start",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "create-admin": "cd backend && node scripts/createAdmin.js"
+  },
+  "keywords": [
+    "blood-donation",
+    "donor-finder",
+    "location-based",
+    "react",
+    "nodejs",
+    "mongodb",
+    "leaflet"
+  ],
+  "author": "BloodFinder Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/bloodfinder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/bloodfinder/issues"
+  },
+  "homepage": "https://github.com/yourusername/bloodfinder#readme"
+} 
