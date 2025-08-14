@@ -1,0 +1,104 @@
+{
+  "name": "ReceiverRequest",
+  "type": "object",
+  "properties": {
+    "requesterId": {
+      "type": "string",
+      "description": "ID of the user making the request"
+    },
+    "requesterName": {
+      "type": "string",
+      "description": "Name of the requester"
+    },
+    "requesterPhone": {
+      "type": "string",
+      "description": "Phone number of requester"
+    },
+    "bloodType": {
+      "type": "string",
+      "enum": [
+        "A+",
+        "A-",
+        "B+",
+        "B-",
+        "O+",
+        "O-",
+        "AB+",
+        "AB-"
+      ],
+      "description": "Required blood type"
+    },
+    "unitsNeeded": {
+      "type": "number",
+      "default": 1,
+      "description": "Number of blood units needed"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes or urgency details"
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "Point"
+          ],
+          "default": "Point"
+        },
+        "coordinates": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[longitude, latitude]"
+        }
+      },
+      "description": "GeoJSON Point for request location"
+    },
+    "radiusMeters": {
+      "type": "number",
+      "default": 5000,
+      "description": "Search radius in meters"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "matched",
+        "fulfilled",
+        "cancelled"
+      ],
+      "default": "open",
+      "description": "Current status of the request"
+    },
+    "matchedDonorId": {
+      "type": "string",
+      "description": "ID of matched donor if any"
+    },
+    "hospital": {
+      "type": "string",
+      "description": "Hospital or medical facility name"
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "routine",
+        "urgent",
+        "emergency"
+      ],
+      "default": "routine",
+      "description": "Urgency level of the request"
+    }
+  },
+  "required": [
+    "requesterId",
+    "requesterName",
+    "requesterPhone",
+    "bloodType",
+    "location"
+  ]
+}

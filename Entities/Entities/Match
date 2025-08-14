@@ -1,0 +1,58 @@
+{
+  "name": "Match",
+  "type": "object",
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "description": "ID of the receiver request"
+    },
+    "donorId": {
+      "type": "string",
+      "description": "ID of the donor"
+    },
+    "donorName": {
+      "type": "string",
+      "description": "Name of the donor"
+    },
+    "donorPhone": {
+      "type": "string",
+      "description": "Phone number of donor"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "Status of the match"
+    },
+    "acceptedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the match was accepted"
+    },
+    "declinedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the match was declined"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this match expires"
+    },
+    "distance": {
+      "type": "number",
+      "description": "Distance between donor and receiver in meters"
+    }
+  },
+  "required": [
+    "requestId",
+    "donorId",
+    "donorName",
+    "donorPhone"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+    "name": "Donor",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Full name of the donor"
+      },
+      "phone": {
+        "type": "string",
+        "description": "Phone number for contact"
+      },
+      "email": {
+        "type": "string",
+        "description": "Email address"
+      },
+      "bloodType": {
+        "type": "string",
+        "enum": [
+          "A+",
+          "A-",
+          "B+",
+          "B-",
+          "O+",
+          "O-",
+          "AB+",
+          "AB-"
+        ],
+        "description": "Blood type of the donor"
+      },
+      "lastDonationDate": {
+        "type": "string",
+        "format": "date",
+        "description": "Date of last blood donation"
+      },
+      "availability": {
+        "type": "boolean",
+        "default": false,
+        "description": "Whether donor is currently available"
+      },
+      "verified": {
+        "type": "boolean",
+        "default": false,
+        "description": "Whether donor is verified by admin"
+      },
+      "location": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Point"
+            ],
+            "default": "Point"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "[longitude, latitude]"
+          }
+        },
+        "description": "GeoJSON Point for donor location"
+      },
+      "lastLocationUpdate": {
+        "type": "string",
+        "format": "date-time",
+        "description": "When location was last updated"
+      },
+      "role": {
+        "type": "string",
+        "enum": [
+          "donor",
+          "receiver",
+          "admin"
+        ],
+        "default": "donor",
+        "description": "User role in the system"
+      }
+    },
+    "required": [
+      "name",
+      "phone",
+      "email",
+      "bloodType"
+    ]
+  }
