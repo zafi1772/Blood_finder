@@ -124,7 +124,6 @@
     }
 }
 
-/* Added glassmorphism utility classes for modern design */
 .glass {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
