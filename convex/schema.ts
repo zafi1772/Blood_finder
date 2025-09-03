@@ -39,7 +39,7 @@ export const User = v.object({
 
 export const DonationRequest = {
     receiverId: v.id("users"),
-    donatorId: v.id("users"),
+    donorId: v.id("users"),
     bloodType: v.union(
         v.literal("A+"),
         v.literal("A-"),
@@ -76,6 +76,14 @@ export const Conversation = {
 
 export default defineSchema({
     users: defineTable(User).index("indexEmail", ["email"]),
-    donationRequests: defineTable(DonationRequest),
+    donationRequests: defineTable(DonationRequest)
+        .searchIndex("searchReceiver", {
+            searchField: "receiverId",
+            filterFields: ["requestStatus", "donationStatus"],
+        })
+        .searchIndex("searchDonor", {
+            searchField: "donorId",
+            filterFields: ["requestStatus", "donationStatus"],
+        }),
     conversations: defineTable(Conversation),
 });

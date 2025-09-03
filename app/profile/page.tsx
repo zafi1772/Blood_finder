@@ -14,35 +14,19 @@ import {
     User,
     Edit,
 } from "lucide-react";
-
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import ProfileTab from "@/components/profile/profile-tab";
 import RequestsTab from "@/components/profile/requests-tab";
 import HistoryTab from "@/components/profile/history-tab";
 import SettingsTab from "@/components/profile/settings-tab";
+
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { redirect } from "next/navigation";
 
 export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState("profile");
-    const [isEditing, setIsEditing] = useState(false);
     const [isNewRequestOpen, setIsNewRequestOpen] = useState(false);
-    const user = useQuery(api.users.getUserExistence);
-
-    const [userData, setUserData] = useState({
-        name: "Sarah Martinez",
-        email: "sarah.martinez@email.com",
-        phone: "+1 (555) 123-4567",
-        bloodType: "O+",
-        location: "San Francisco, CA",
-        nid: "1234567890123",
-        joinDate: "March 2024",
-        totalDonations: 12,
-        totalDonationsReceived: 8,
-        lastDonation: "January 10, 2024",
-    });
-
-    const [formData, setFormData] = useState(userData);
+    const user = useQuery(api.users.getUserProfileData);
 
     const [donationHistory] = useState([
         {
@@ -174,26 +158,6 @@ export default function ProfilePage() {
     const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
     const urgencyLevels = ["Low", "Medium", "High", "Critical"];
 
-    const handleEditClick = () => {
-        setFormData(userData);
-        setIsEditing(true);
-    };
-
-    const handleSave = () => {
-        setUserData(formData);
-        setIsEditing(false);
-        console.log("[v0] Profile updated:", formData);
-    };
-
-    const handleCancel = () => {
-        setFormData(userData);
-        setIsEditing(false);
-    };
-
-    const handleInputChange = (field: string, value: string) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
-    };
-
     const handleNewRequestChange = (field: string, value: string) => {
         setNewRequest((prev) => ({ ...prev, [field]: value }));
     };
@@ -264,7 +228,7 @@ export default function ProfilePage() {
 
     return (
         <div>
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
+            <div className="container mx-auto px-4 py-8 max-w-8xl">
                 {/* Profile Header */}
                 <div className="mb-8">
                     <Card className="glass-card border-0 shadow-lg overflow-hidden">
@@ -280,10 +244,10 @@ export default function ProfilePage() {
                                                 className="object-cover"
                                             />
                                             <AvatarFallback className="text-3xl font-semibold bg-gradient-to-br from-primary to-accent text-white">
-                                                {userData.name
-                                                    .split(" ")
+                                                {user?.fullName
+                                                    ?.split(" ")
                                                     .map((n) => n[0])
-                                                    .join("")}
+                                                    .join("") || "U"}
                                             </AvatarFallback>
                                         </Avatar>
                                     </div>
@@ -293,7 +257,7 @@ export default function ProfilePage() {
                                 <div className="flex-1 text-center lg:text-left space-y-3">
                                     <h1 className="text-4xl font-bold">
                                         <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                                            {userData.name}
+                                            {user?.fullName || "Unnamed User"}
                                         </span>
                                     </h1>
 
@@ -301,13 +265,30 @@ export default function ProfilePage() {
                                         <div className="flex items-center justify-center lg:justify-start gap-2 text-muted-foreground hover:text-primary transition-colors">
                                             <MapPin className="h-4 w-4" />
                                             <span className="text-sm">
-                                                {userData.location}
+                                                {user.addressText
+                                                    ? user.addressText
+                                                          .district +
+                                                      ", " +
+                                                      user.addressText.division
+                                                    : "Location not set"}
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-center lg:justify-start gap-2 text-muted-foreground hover:text-primary transition-colors">
                                             <Calendar className="h-4 w-4" />
                                             <span className="text-sm">
-                                                Since {userData.joinDate}
+                                                Since{" "}
+                                                {user._creationTime
+                                                    ? new Date(
+                                                          user._creationTime
+                                                      ).toLocaleString(
+                                                          "en-US",
+                                                          {
+                                                              month: "long",
+                                                              year: "numeric",
+                                                              day: "numeric",
+                                                          }
+                                                      )
+                                                    : "Unknown"}
                                             </span>
                                         </div>
                                     </div>
@@ -316,18 +297,16 @@ export default function ProfilePage() {
                                 {/* Stats Section */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:flex lg:flex-row lg:gap-8">
                                     {/* Donations Made */}
-                                    <div className="group relative">
+                                    <div className="group relative w-64 h-32 flex items-center justify-center">
                                         <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary/50 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
-                                        <div className="relative p-4 bg-card/50 backdrop-blur-sm border border-primary/10 rounded-xl transition-all duration-300 group-hover:translate-y-[-2px]">
-                                            <div className="flex items-center gap-4">
+                                        <div className="relative w-full h-full flex items-center justify-center p-4 bg-card/50 backdrop-blur-sm border border-primary/10 rounded-xl transition-all duration-300 group-hover:translate-y-[-2px]">
+                                            <div className="flex items-center gap-4 w-full h-full">
                                                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 group-hover:scale-110 transition-transform duration-300">
                                                     <Heart className="h-6 w-6 text-primary" />
                                                 </div>
-                                                <div>
-                                                    <div className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                                                        {
-                                                            userData.totalDonations
-                                                        }
+                                                <div className="flex flex-col justify-center">
+                                                    <div className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                                                        {user.totalDonations}
                                                     </div>
                                                     <div className="text-xs font-medium tracking-wider text-muted-foreground">
                                                         DONATIONS MADE
@@ -338,17 +317,17 @@ export default function ProfilePage() {
                                     </div>
 
                                     {/* Donations Received */}
-                                    <div className="group relative">
+                                    <div className="group relative w-64 h-32 flex items-center justify-center">
                                         <div className="absolute -inset-0.5 bg-gradient-to-r from-accent to-accent/50 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
-                                        <div className="relative p-4 bg-card/50 backdrop-blur-sm border border-accent/10 rounded-xl transition-all duration-300 group-hover:translate-y-[-2px]">
-                                            <div className="flex items-center gap-4">
+                                        <div className="relative w-full h-full flex items-center justify-center p-4 bg-card/50 backdrop-blur-sm border border-accent/10 rounded-xl transition-all duration-300 group-hover:translate-y-[-2px]">
+                                            <div className="flex items-center gap-4 w-full h-full">
                                                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 group-hover:scale-110 transition-transform duration-300">
                                                     <MessageSquare className="h-6 w-6 text-accent" />
                                                 </div>
-                                                <div>
-                                                    <div className="text-4xl font-bold bg-gradient-to-r from-accent to-accent/70 bg-clip-text text-transparent">
+                                                <div className="flex flex-col justify-center">
+                                                    <div className="text-2xl font-bold bg-gradient-to-r from-accent to-accent/70 bg-clip-text text-transparent">
                                                         {
-                                                            userData.totalDonationsReceived
+                                                            user.totalDonationsReceived
                                                         }
                                                     </div>
                                                     <div className="text-xs font-medium tracking-wider text-muted-foreground">
@@ -360,16 +339,27 @@ export default function ProfilePage() {
                                     </div>
 
                                     {/* Last Donation */}
-                                    <div className="group relative">
+                                    <div className="group relative w-64 h-32 flex items-center justify-center">
                                         <div className="absolute -inset-0.5 bg-gradient-to-r from-foreground/60 to-foreground/30 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-                                        <div className="relative p-4 bg-card/50 backdrop-blur-sm border border-foreground/10 rounded-xl transition-all duration-300 group-hover:translate-y-[-2px]">
-                                            <div className="flex items-center gap-4">
+                                        <div className="relative w-full h-full flex items-center justify-center p-4 bg-card/50 backdrop-blur-sm border border-foreground/10 rounded-xl transition-all duration-300 group-hover:translate-y-[-2px]">
+                                            <div className="flex items-center gap-4 w-full h-full">
                                                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-foreground/10 group-hover:scale-110 transition-transform duration-300">
                                                     <History className="h-6 w-6 text-foreground/80" />
                                                 </div>
-                                                <div>
+                                                <div className="flex flex-col justify-center">
                                                     <div className="text-2xl font-bold text-foreground/90">
-                                                        {userData.lastDonation}
+                                                        {user.lastDonated
+                                                            ? new Date(
+                                                                  user.lastDonated
+                                                              ).toLocaleString(
+                                                                  "en-US",
+                                                                  {
+                                                                      month: "long",
+                                                                      year: "numeric",
+                                                                      day: "numeric",
+                                                                  }
+                                                              )
+                                                            : "Unknown"}
                                                     </div>
                                                     <div className="text-xs font-medium tracking-wider text-muted-foreground">
                                                         LAST DONATION
@@ -423,16 +413,7 @@ export default function ProfilePage() {
 
                     {/* Profile Tab Content */}
                     <TabsContent value="profile" className="space-y-6">
-                        <ProfileTab
-                            isEditing={isEditing}
-                            userData={userData}
-                            formData={formData}
-                            bloodTypes={bloodTypes}
-                            handleInputChange={handleInputChange}
-                            handleEditClick={handleEditClick}
-                            handleSave={handleSave}
-                            handleCancel={handleCancel}
-                        />
+                        <ProfileTab user={user && user.exists ? user : null} />
                     </TabsContent>
 
                     {/* Requests Tab Content */}
@@ -453,9 +434,7 @@ export default function ProfilePage() {
 
                     {/* History Tab Content */}
                     <TabsContent value="history" className="space-y-6">
-                        <HistoryTab 
-                            donationHistory={donationHistory}
-                        />
+                        <HistoryTab donationHistory={donationHistory} />
                     </TabsContent>
 
                     {/* Settings Tab Content - Placeholder */}
