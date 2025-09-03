@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -28,6 +29,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { MapPin, Loader2 } from "lucide-react";
 import { Heart, Users, Shield, Phone, Search, Zap } from "lucide-react";
+import Navbar from "@/components/home/navbar";
 
 export default function BloodFinderLandingPage() {
     const [isLocationLoading, setIsLocationLoading] = useState(false);
@@ -99,49 +101,7 @@ export default function BloodFinderLandingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <header className="border-b glass-card sticky top-0 z-50">
-                <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <div className="relative">
-                            <Heart className="h-8 w-8 text-primary fill-primary" />
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-pulse"></div>
-                        </div>
-                        <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                            BloodFinder
-                        </span>
-                    </div>
-                    <nav className="hidden md:flex items-center space-x-8">
-                        <a
-                            href="#how-it-works"
-                            className="text-foreground hover:text-primary transition-colors font-medium"
-                        >
-                            How It Works
-                        </a>
-                        <a
-                            href="#features"
-                            className="text-foreground hover:text-primary transition-colors font-medium"
-                        >
-                            Features
-                        </a>
-                        <a
-                            href="#about"
-                            className="text-foreground hover:text-primary transition-colors font-medium"
-                        >
-                            About
-                        </a>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:scale-105 transition-transform bg-transparent"
-                        >
-                            Sign In
-                        </Button>
-                    </nav>
-                </div>
-            </header>
-
+        <div>
             {/* Hero Section */}
             <section className="relative py-24 px-4 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-secondary via-background to-muted"></div>
@@ -204,7 +164,7 @@ export default function BloodFinderLandingPage() {
                                             value={selectedBloodType}
                                             onValueChange={setSelectedBloodType}
                                         >
-                                            <SelectTrigger className="w-full">
+                                            <SelectTrigger>
                                                 <SelectValue placeholder="Select your blood type" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -477,8 +437,8 @@ export default function BloodFinderLandingPage() {
                                 </h3>
                                 <p className="text-muted-foreground leading-relaxed">
                                     Track your donation history, see the lives
-                                    you've helped save, and earn recognition for
-                                    your contributions.
+                                    you&apos;ve helped save, and earn
+                                    recognition for your contributions.
                                 </p>
                             </div>
                         </div>
@@ -564,10 +524,10 @@ export default function BloodFinderLandingPage() {
                             </CardHeader>
                             <CardContent>
                                 <p className="text-muted-foreground leading-relaxed">
-                                    "BloodFinder made it so easy to help my
+                                    &quot;BloodFinder made it so easy to help my
                                     neighbor during their emergency surgery. The
                                     app connected me instantly with someone who
-                                    needed my blood type."
+                                    needed my blood type.&quot;
                                 </p>
                             </CardContent>
                         </Card>
@@ -592,10 +552,10 @@ export default function BloodFinderLandingPage() {
                             </CardHeader>
                             <CardContent>
                                 <p className="text-muted-foreground leading-relaxed">
-                                    "When my daughter needed an emergency
+                                    &quot;When my daughter needed an emergency
                                     transfusion, BloodFinder helped us find 3
                                     donors within 20 minutes. This app literally
-                                    saved her life."
+                                    saved her life.&quot;
                                 </p>
                             </CardContent>
                         </Card>
@@ -620,13 +580,50 @@ export default function BloodFinderLandingPage() {
                             </CardHeader>
                             <CardContent>
                                 <p className="text-muted-foreground leading-relaxed">
-                                    "BloodFinder has revolutionized how we
+                                    &quot;BloodFinder has revolutionized how we
                                     handle blood shortages. The platform
                                     connects us directly with verified donors in
-                                    our community."
+                                    our community.&quot;
                                 </p>
                             </CardContent>
                         </Card>
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="py-24 px-4 bg-gradient-to-br from-primary via-primary/90 to-accent text-white relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full">
+                    <div className="absolute top-20 left-20 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                    <div className="absolute bottom-20 right-20 w-60 h-60 bg-white/5 rounded-full blur-3xl"></div>
+                </div>
+
+                <div className="container mx-auto text-center max-w-5xl relative z-10">
+                    <h2 className="text-5xl md:text-6xl font-bold mb-8 text-balance leading-tight">
+                        Ready to Save Lives?
+                    </h2>
+                    <p className="text-xl mb-12 text-white/90 max-w-3xl mx-auto leading-relaxed">
+                        Join thousands of verified donors and recipients who
+                        trust BloodFinder to make a life-saving difference in
+                        their communities.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                        <Button
+                            size="lg"
+                            variant="secondary"
+                            className="text-lg px-10 py-7 hover:scale-105 transition-transform shadow-xl"
+                        >
+                            <Heart className="mr-3 h-6 w-6" />
+                            Start Donating Today
+                        </Button>
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            className="text-lg px-10 py-7 border-white text-white hover:bg-white hover:text-primary bg-transparent hover:scale-105 transition-all shadow-xl"
+                        >
+                            <Search className="mr-3 h-6 w-6" />
+                            Find Blood Now
+                        </Button>
                     </div>
                 </div>
             </section>

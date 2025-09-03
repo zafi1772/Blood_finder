@@ -35,7 +35,6 @@ import {
     User,
     History,
     MessageSquare,
-    ArrowLeft,
     Edit,
     MapPin,
     Phone,
@@ -48,13 +47,18 @@ import {
     CheckCircle,
     XCircle,
     AlertCircle,
+    Loader2,
 } from "lucide-react";
-import Link from "next/link";
+
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { redirect } from "next/navigation";
 
 export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState("profile");
     const [isEditing, setIsEditing] = useState(false);
     const [isNewRequestOpen, setIsNewRequestOpen] = useState(false);
+    const user = useQuery(api.users.getUserExistence);
 
     const [userData, setUserData] = useState({
         name: "Sarah Martinez",
@@ -62,7 +66,7 @@ export default function ProfilePage() {
         phone: "+1 (555) 123-4567",
         bloodType: "O+",
         location: "San Francisco, CA",
-        nid: "1234567890123", // National Identity Number
+        nid: "1234567890123",
         joinDate: "March 2024",
         totalDonations: 12,
         totalDonationsReceived: 8,
@@ -303,32 +307,34 @@ export default function ProfilePage() {
         });
     };
 
-    return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <header className="border-b glass-card sticky top-0 z-50">
-                <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                        <Link
-                            href="/"
-                            className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
-                        >
-                            <ArrowLeft className="h-5 w-5" />
-                            <span>Back to Home</span>
-                        </Link>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <div className="relative">
-                            <Heart className="h-8 w-8 text-primary fill-primary" />
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-pulse"></div>
-                        </div>
-                        <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                            BloodFinder
-                        </span>
-                    </div>
-                </div>
-            </header>
+    if (user === null) {
+        redirect("/");
+    }
 
+    if (user && !user.exists) {
+        redirect("/onboard");
+    }
+
+    if (user === undefined) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-rose-50/30 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mb-6">
+                        <Loader2 className="h-8 w-8 text-white animate-spin" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                        Loading your profile...
+                    </h2>
+                    <p className="text-gray-600">
+                        Please wait while we fetch your information.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div>
             <div className="container mx-auto px-4 py-8 max-w-6xl">
                 {/* Profile Header */}
                 <div className="mb-8">

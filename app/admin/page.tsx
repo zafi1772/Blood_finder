@@ -61,9 +61,7 @@ import {
     Package,
     Download,
     Target,
-    ArrowLeft,
 } from "lucide-react";
-import Link from "next/link";
 
 const users = [
     {
@@ -374,31 +372,7 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <header className="border-b glass-card sticky top-0 z-50">
-                <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                        <Link
-                            href="/"
-                            className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
-                        >
-                            <ArrowLeft className="h-5 w-5" />
-                            <span>Back to Home</span>
-                        </Link>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <div className="relative">
-                            <Heart className="h-8 w-8 text-primary fill-primary" />
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-pulse"></div>
-                        </div>
-                        <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                            BloodFinder
-                        </span>
-                    </div>
-                </div>
-            </header>
-
+        <div>
             <div className="container mx-auto px-6 py-8">
                 {/* Dashboard Overview Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -644,7 +618,7 @@ export default function AdminDashboard() {
                                         Quick Stats
                                     </CardTitle>
                                     <CardDescription>
-                                        Today's performance overview
+                                        Today&apos;s performance overview
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
