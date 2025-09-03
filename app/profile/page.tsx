@@ -1,57 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-    Heart,
-    User,
     History,
     MessageSquare,
-    Edit,
     MapPin,
-    Phone,
-    Mail,
     Calendar,
-    Save,
-    X,
-    Plus,
-    Clock,
-    CheckCircle,
-    XCircle,
-    AlertCircle,
     Loader2,
+    Heart,
+    User,
+    Edit,
 } from "lucide-react";
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import ProfileTab from "@/components/profile/profile-tab";
+import RequestsTab from "@/components/profile/requests-tab";
+import HistoryTab from "@/components/profile/history-tab";
+import SettingsTab from "@/components/profile/settings-tab";
 import { redirect } from "next/navigation";
 
 export default function ProfilePage() {
@@ -267,46 +236,6 @@ export default function ProfilePage() {
         console.log("[v0] Responded to request:", requestId, response);
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "Active":
-            case "Pending":
-                return "bg-yellow-100 text-yellow-800 border-yellow-200";
-            case "Fulfilled":
-            case "Accepted":
-            case "Responded":
-            case "Completed":
-                return "bg-green-100 text-green-800 border-green-200";
-            case "Declined":
-                return "bg-red-100 text-red-800 border-red-200";
-            default:
-                return "bg-gray-100 text-gray-800 border-gray-200";
-        }
-    };
-
-    const getUrgencyIcon = (urgency: string) => {
-        switch (urgency) {
-            case "Critical":
-            case "High":
-                return <AlertCircle className="h-4 w-4 text-red-500" />;
-            case "Medium":
-                return <Clock className="h-4 w-4 text-yellow-500" />;
-            case "Low":
-                return <CheckCircle className="h-4 w-4 text-green-500" />;
-            default:
-                return <Clock className="h-4 w-4 text-gray-500" />;
-        }
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    };
-
     if (user === null) {
         redirect("/");
     }
@@ -494,644 +423,44 @@ export default function ProfilePage() {
 
                     {/* Profile Tab Content */}
                     <TabsContent value="profile" className="space-y-6">
-                        <Card className="glass-card border-0 shadow-lg">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <User className="h-5 w-5 text-primary" />
-                                    Personal Information
-                                </CardTitle>
-                                <CardDescription>
-                                    {isEditing
-                                        ? "Update your profile information"
-                                        : "Your basic profile information and contact details"}
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {isEditing ? (
-                                    // Edit Mode
-                                    <div className="space-y-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="name">
-                                                    Full Name
-                                                </Label>
-                                                <Input
-                                                    id="name"
-                                                    value={formData.name}
-                                                    disabled
-                                                    className="bg-muted/50 cursor-not-allowed"
-                                                    placeholder="Enter your full name"
-                                                />
-                                                <p className="text-xs text-muted-foreground">
-                                                    Name cannot be changed
-                                                </p>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="bloodType">
-                                                    Blood Type
-                                                </Label>
-                                                <Select
-                                                    value={formData.bloodType}
-                                                    onValueChange={(value) =>
-                                                        handleInputChange(
-                                                            "bloodType",
-                                                            value
-                                                        )
-                                                    }
-                                                >
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue placeholder="Select blood type" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {bloodTypes.map(
-                                                            (type) => (
-                                                                <SelectItem
-                                                                    key={type}
-                                                                    value={type}
-                                                                >
-                                                                    {type}
-                                                                </SelectItem>
-                                                            )
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="email">
-                                                    Email
-                                                </Label>
-                                                <Input
-                                                    id="email"
-                                                    type="email"
-                                                    value={formData.email}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            "email",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    placeholder="Enter your email"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="phone">
-                                                    Phone
-                                                </Label>
-                                                <Input
-                                                    id="phone"
-                                                    value={formData.phone}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            "phone",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    placeholder="Enter your phone number"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="location">
-                                                    Location
-                                                </Label>
-                                                <Input
-                                                    id="location"
-                                                    value={formData.location}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            "location",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    placeholder="Enter your location"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="nid">
-                                                    NID (National Identity
-                                                    Number)
-                                                </Label>
-                                                <Input
-                                                    id="nid"
-                                                    value={formData.nid}
-                                                    disabled
-                                                    className="bg-muted/50 cursor-not-allowed"
-                                                    placeholder="National Identity Number"
-                                                />
-                                                <p className="text-xs text-muted-foreground">
-                                                    NID cannot be changed
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-4 pt-4">
-                                            <Button
-                                                onClick={handleSave}
-                                                className="hover:scale-105 transition-transform"
-                                            >
-                                                <Save className="h-4 w-4 mr-2" />
-                                                Save Changes
-                                            </Button>
-                                            <Button
-                                                onClick={handleCancel}
-                                                variant="outline"
-                                                className="hover:scale-105 transition-transform bg-transparent"
-                                            >
-                                                <X className="h-4 w-4 mr-2" />
-                                                Cancel
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    // View Mode
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-muted-foreground">
-                                                    Full Name
-                                                </label>
-                                                <div className="p-3 bg-muted/50 rounded-lg">
-                                                    {userData.name}
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-muted-foreground">
-                                                    Blood Type
-                                                </label>
-                                                <div className="p-3 bg-muted/50 rounded-lg">
-                                                    {userData.bloodType}
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-muted-foreground">
-                                                    Email
-                                                </label>
-                                                <div className="p-3 bg-muted/50 rounded-lg flex items-center gap-2">
-                                                    <Mail className="h-4 w-4 text-muted-foreground" />
-                                                    {userData.email}
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-muted-foreground">
-                                                    Phone
-                                                </label>
-                                                <div className="p-3 bg-muted/50 rounded-lg flex items-center gap-2">
-                                                    <Phone className="h-4 w-4 text-muted-foreground" />
-                                                    {userData.phone}
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-muted-foreground">
-                                                    Location
-                                                </label>
-                                                <div className="p-3 bg-muted/50 rounded-lg flex items-center gap-2">
-                                                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                                                    {userData.location}
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-muted-foreground">
-                                                    NID (National Identity
-                                                    Number)
-                                                </label>
-                                                <div className="p-3 bg-muted/50 rounded-lg">
-                                                    {userData.nid}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="pt-4">
-                                            <Button
-                                                onClick={handleEditClick}
-                                                className="hover:scale-105 transition-transform"
-                                            >
-                                                <Edit className="h-4 w-4 mr-2" />
-                                                Edit Profile
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                        <ProfileTab
+                            isEditing={isEditing}
+                            userData={userData}
+                            formData={formData}
+                            bloodTypes={bloodTypes}
+                            handleInputChange={handleInputChange}
+                            handleEditClick={handleEditClick}
+                            handleSave={handleSave}
+                            handleCancel={handleCancel}
+                        />
                     </TabsContent>
 
                     {/* Requests Tab Content */}
                     <TabsContent value="requests" className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-2xl font-bold text-foreground">
-                                Blood Donation Requests
-                            </h2>
-                            <Dialog
-                                open={isNewRequestOpen}
-                                onOpenChange={setIsNewRequestOpen}
-                            >
-                                <DialogTrigger asChild>
-                                    <Button className="hover:scale-105 transition-transform">
-                                        <Plus className="h-4 w-4 mr-2" />
-                                        New Request
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-md">
-                                    <DialogHeader>
-                                        <DialogTitle>
-                                            Create Blood Request
-                                        </DialogTitle>
-                                        <DialogDescription>
-                                            Submit a new blood donation request
-                                            to find compatible donors in your
-                                            area.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="space-y-4 py-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="request-blood-type">
-                                                Blood Type Needed
-                                            </Label>
-                                            <Select
-                                                value={newRequest.bloodType}
-                                                onValueChange={(value) =>
-                                                    handleNewRequestChange(
-                                                        "bloodType",
-                                                        value
-                                                    )
-                                                }
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select blood type" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {bloodTypes.map((type) => (
-                                                        <SelectItem
-                                                            key={type}
-                                                            value={type}
-                                                        >
-                                                            {type}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="request-amount">
-                                                Amount Needed
-                                            </Label>
-                                            <Input
-                                                id="request-amount"
-                                                value={newRequest.amount}
-                                                onChange={(e) =>
-                                                    handleNewRequestChange(
-                                                        "amount",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                placeholder="e.g., 200ml, 450ml"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="request-urgency">
-                                                Urgency Level
-                                            </Label>
-                                            <Select
-                                                value={newRequest.urgency}
-                                                onValueChange={(value) =>
-                                                    handleNewRequestChange(
-                                                        "urgency",
-                                                        value
-                                                    )
-                                                }
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select urgency" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {urgencyLevels.map(
-                                                        (level) => (
-                                                            <SelectItem
-                                                                key={level}
-                                                                value={level}
-                                                            >
-                                                                {level}
-                                                            </SelectItem>
-                                                        )
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="request-location">
-                                                Hospital/Location
-                                            </Label>
-                                            <Input
-                                                id="request-location"
-                                                value={newRequest.location}
-                                                onChange={(e) =>
-                                                    handleNewRequestChange(
-                                                        "location",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                placeholder="Enter hospital or location"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="request-message">
-                                                Message
-                                            </Label>
-                                            <Textarea
-                                                id="request-message"
-                                                value={newRequest.message}
-                                                onChange={(e) =>
-                                                    handleNewRequestChange(
-                                                        "message",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                placeholder="Provide details about the blood need..."
-                                                rows={3}
-                                            />
-                                        </div>
-                                        <Button
-                                            onClick={handleSubmitRequest}
-                                            className="w-full"
-                                            disabled={
-                                                !newRequest.bloodType ||
-                                                !newRequest.urgency ||
-                                                !newRequest.location ||
-                                                !newRequest.amount
-                                            }
-                                        >
-                                            Submit Request
-                                        </Button>
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Requests I Made */}
-                            <Card className="glass-card border-0 shadow-lg">
-                                <CardHeader>
-                                    <CardTitle className="text-primary flex items-center gap-2">
-                                        <MessageSquare className="h-5 w-5" />
-                                        Requests I Made ({requestsMade.length})
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Blood requests you have submitted
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    {requestsMade.length > 0 ? (
-                                        <div className="space-y-4">
-                                            {requestsMade.map((request) => (
-                                                <div
-                                                    key={request.id}
-                                                    className="p-4 border border-border rounded-lg glass"
-                                                >
-                                                    <div className="flex items-start justify-between mb-3">
-                                                        <div className="flex items-center gap-2">
-                                                            {getUrgencyIcon(
-                                                                request.urgency
-                                                            )}
-                                                            <Badge className="bg-primary/10 text-primary border-primary/20">
-                                                                {
-                                                                    request.bloodType
-                                                                }
-                                                            </Badge>
-                                                            <Badge className="bg-accent/10 text-accent border-accent/20">
-                                                                {request.amount}
-                                                            </Badge>
-                                                            <Badge
-                                                                className={getStatusColor(
-                                                                    request.status
-                                                                )}
-                                                            >
-                                                                {request.status}
-                                                            </Badge>
-                                                        </div>
-                                                        <span className="text-sm text-muted-foreground">
-                                                            {request.createdAt}
-                                                        </span>
-                                                    </div>
-                                                    <h4 className="font-semibold mb-2">
-                                                        {request.location}
-                                                    </h4>
-                                                    <p className="text-sm text-muted-foreground mb-3">
-                                                        {request.message}
-                                                    </p>
-                                                    <div className="flex items-center justify-between text-sm">
-                                                        <span className="text-muted-foreground">
-                                                            Urgency:{" "}
-                                                            {request.urgency}
-                                                        </span>
-                                                        <span className="text-primary font-medium">
-                                                            {request.responses}{" "}
-                                                            responses
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8 text-muted-foreground">
-                                            <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                            <p>No requests made yet</p>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-
-                            {/* Requests I Received */}
-                            <Card className="glass-card border-0 shadow-lg">
-                                <CardHeader>
-                                    <CardTitle className="text-accent flex items-center gap-2">
-                                        <Heart className="h-5 w-5" />
-                                        Requests I Received (
-                                        {requestsReceived.length})
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Blood requests sent to you
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    {requestsReceived.length > 0 ? (
-                                        <div className="space-y-4">
-                                            {requestsReceived.map((request) => (
-                                                <div
-                                                    key={request.id}
-                                                    className="p-4 border border-border rounded-lg glass"
-                                                >
-                                                    <div className="flex items-start justify-between mb-3">
-                                                        <div className="flex items-center gap-2">
-                                                            {getUrgencyIcon(
-                                                                request.urgency
-                                                            )}
-                                                            <Badge className="bg-accent/10 text-accent border-accent/20">
-                                                                {
-                                                                    request.bloodType
-                                                                }
-                                                            </Badge>
-                                                            <Badge className="bg-primary/10 text-primary border-primary/20">
-                                                                {request.amount}
-                                                            </Badge>
-                                                            <Badge
-                                                                className={getStatusColor(
-                                                                    request.status
-                                                                )}
-                                                            >
-                                                                {request.status}
-                                                            </Badge>
-                                                        </div>
-                                                        <span className="text-sm text-muted-foreground">
-                                                            {request.createdAt}
-                                                        </span>
-                                                    </div>
-                                                    <h4 className="font-semibold mb-1">
-                                                        {request.requesterName}
-                                                    </h4>
-                                                    <p className="text-sm text-muted-foreground mb-2">
-                                                        {request.location} •{" "}
-                                                        {request.distance}
-                                                    </p>
-                                                    <p className="text-sm text-muted-foreground mb-3">
-                                                        {request.message}
-                                                    </p>
-                                                    {request.status ===
-                                                        "Pending" && (
-                                                        <div className="flex gap-2">
-                                                            <Button
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                    handleRespondToRequest(
-                                                                        request.id,
-                                                                        "accept"
-                                                                    )
-                                                                }
-                                                                className="flex-1"
-                                                            >
-                                                                <CheckCircle className="h-4 w-4 mr-1" />
-                                                                Accept
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="outline"
-                                                                onClick={() =>
-                                                                    handleRespondToRequest(
-                                                                        request.id,
-                                                                        "decline"
-                                                                    )
-                                                                }
-                                                                className="flex-1 bg-transparent"
-                                                            >
-                                                                <XCircle className="h-4 w-4 mr-1" />
-                                                                Decline
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8 text-muted-foreground">
-                                            <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                            <p>No requests received yet</p>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </div>
+                        <RequestsTab
+                            isNewRequestOpen={isNewRequestOpen}
+                            setIsNewRequestOpen={setIsNewRequestOpen}
+                            requestsMade={requestsMade}
+                            requestsReceived={requestsReceived}
+                            newRequest={newRequest}
+                            bloodTypes={bloodTypes}
+                            urgencyLevels={urgencyLevels}
+                            handleNewRequestChange={handleNewRequestChange}
+                            handleSubmitRequest={handleSubmitRequest}
+                            handleRespondToRequest={handleRespondToRequest}
+                        />
                     </TabsContent>
 
                     {/* History Tab Content */}
                     <TabsContent value="history" className="space-y-6">
-                        <Card className="glass-card border-0 shadow-lg">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <History className="h-5 w-5 text-primary" />
-                                    Donation History
-                                </CardTitle>
-                                <CardDescription>
-                                    Your blood donation history
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    {donationHistory.map((donation) => (
-                                        <div
-                                            key={donation.id}
-                                            className="p-4 border border-border rounded-lg glass hover:shadow-md transition-shadow"
-                                        >
-                                            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
-                                                <div className="flex items-center gap-2">
-                                                    <Badge className="bg-primary/10 text-primary border-primary/20">
-                                                        {donation.bloodType}
-                                                    </Badge>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <Badge
-                                                        className={getStatusColor(
-                                                            donation.status
-                                                        )}
-                                                    >
-                                                        {donation.status}
-                                                    </Badge>
-                                                </div>
-
-                                                <div className="text-sm">
-                                                    <span className="font-medium">
-                                                        {formatDate(
-                                                            donation.date
-                                                        )}
-                                                    </span>
-                                                </div>
-
-                                                <div className="text-sm">
-                                                    <span className="text-muted-foreground">
-                                                        {donation.location}
-                                                    </span>
-                                                </div>
-
-                                                <div className="text-sm">
-                                                    <span className="font-medium text-primary">
-                                                        {donation.amount}
-                                                    </span>
-                                                </div>
-
-                                                <div className="text-sm">
-                                                    <span className="text-muted-foreground">
-                                                        {donation.recipient}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <HistoryTab 
+                            donationHistory={donationHistory}
+                        />
                     </TabsContent>
 
                     {/* Settings Tab Content - Placeholder */}
                     <TabsContent value="settings" className="space-y-6">
-                        <Card className="glass-card border-0 shadow-lg">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Edit className="h-5 w-5 text-primary" />
-                                    Account Settings
-                                </CardTitle>
-                                <CardDescription>
-                                    Manage your account preferences and settings
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <Edit className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                                    <p className="text-lg mb-2">
-                                        Settings coming soon
-                                    </p>
-                                    <p className="text-sm">
-                                        Profile customization options will be
-                                        available here
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <SettingsTab />
                     </TabsContent>
                 </Tabs>
             </div>
