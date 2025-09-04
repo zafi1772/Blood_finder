@@ -39,7 +39,6 @@ export const User = v.object({
 
 export const DonationRequest = {
     receiverId: v.id("users"),
-    donorId: v.id("users"),
     bloodType: v.union(
         v.literal("A+"),
         v.literal("A-"),
@@ -57,13 +56,27 @@ export const DonationRequest = {
         v.literal("High"),
         v.literal("Critical")
     ),
-    address: v.object({
-        addressText: v.string(),
-        latitude: v.number(),
-        longitude: v.number(),
-    }),
-    requestStatus: v.boolean(),
-    donationStatus: v.boolean(),
+    addressText: v.string(),
+    addressLatitude: v.number(),
+    addressLongitude: v.number(),
+    requestStatus: v.union(
+        v.literal("Active"),
+        v.literal("Cancelled"),
+        v.literal("Fulfilled")
+    ),
+    message: v.string(),
+};
+
+export const DonationRequestToDonor = {
+    requestId: v.id("donationRequests"),
+    donorId: v.id("users"),
+    requestResponseStatus: v.union(
+        v.literal("Accepted"),
+        v.literal("Pending"),
+        v.literal("Rejected")
+    ),
+    donationStatus: v.union(v.literal("Fulfilled"), v.literal("Pending")),
+    donationTime: v.optional(v.number()),
 };
 
 export const Conversation = {
@@ -76,14 +89,37 @@ export const Conversation = {
 
 export default defineSchema({
     users: defineTable(User).index("indexEmail", ["email"]),
-    donationRequests: defineTable(DonationRequest)
-        .searchIndex("searchReceiver", {
+    donationRequests: defineTable(DonationRequest).searchIndex(
+        "searchReceiverId",
+        {
             searchField: "receiverId",
-            filterFields: ["requestStatus", "donationStatus"],
+            filterFields: ["requestStatus"],
+        }
+    ),
+    donationRequestsToDonors: defineTable(DonationRequestToDonor)
+        .searchIndex("searchRequestId", {
+            searchField: "requestId",
+            filterFields: [
+                "donorId",
+                "requestResponseStatus",
+                "donationStatus",
+            ],
         })
-        .searchIndex("searchDonor", {
+        .searchIndex("searchDonorId", {
             searchField: "donorId",
-            filterFields: ["requestStatus", "donationStatus"],
+            filterFields: [
+                "requestId",
+                "requestResponseStatus",
+                "donationStatus",
+            ],
+        })
+        .searchIndex("searchRequestResponseStatus", {
+            searchField: "requestResponseStatus",
+            filterFields: ["requestId", "donorId", "donationStatus"],
+        })
+        .searchIndex("searchDonationStatus", {
+            searchField: "donationStatus",
+            filterFields: ["requestId", "donorId", "requestResponseStatus"],
         }),
     conversations: defineTable(Conversation),
 });

@@ -9,7 +9,6 @@ import {
     MessageSquare,
     MapPin,
     Calendar,
-    Loader2,
     Heart,
     User,
     Edit,
@@ -18,6 +17,7 @@ import ProfileTab from "@/components/profile/profile-tab";
 import RequestsTab from "@/components/profile/requests-tab";
 import HistoryTab from "@/components/profile/history-tab";
 import SettingsTab from "@/components/profile/settings-tab";
+import Loader from "@/components/others/loader";
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -25,7 +25,6 @@ import { redirect } from "next/navigation";
 
 export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState("profile");
-    const [isNewRequestOpen, setIsNewRequestOpen] = useState(false);
     const user = useQuery(api.users.getUserProfileData);
 
     const [donationHistory] = useState([
@@ -91,115 +90,6 @@ export default function ProfilePage() {
         },
     ]);
 
-    const [requestsMade, setRequestsMade] = useState([
-        {
-            id: 1,
-            bloodType: "O+",
-            urgency: "High",
-            location: "UCSF Medical Center",
-            amount: "450ml",
-            message:
-                "Needed for emergency surgery. Patient is stable but requires immediate transfusion.",
-            status: "Active",
-            createdAt: "2024-01-15",
-            responses: 3,
-        },
-        {
-            id: 2,
-            bloodType: "O+",
-            urgency: "Medium",
-            location: "Stanford Hospital",
-            amount: "200ml",
-            message:
-                "Scheduled surgery next week. Looking for compatible donors in the area.",
-            status: "Fulfilled",
-            createdAt: "2024-01-10",
-            responses: 5,
-        },
-    ]);
-
-    const [requestsReceived, setRequestsReceived] = useState([
-        {
-            id: 3,
-            requesterName: "Michael Chen",
-            bloodType: "O+",
-            urgency: "High",
-            location: "SF General Hospital",
-            amount: "300ml",
-            message:
-                "My daughter needs O+ blood for her surgery tomorrow. Please help if you can.",
-            status: "Pending",
-            createdAt: "2024-01-16",
-            distance: "2.3 miles",
-        },
-        {
-            id: 4,
-            requesterName: "Lisa Rodriguez",
-            bloodType: "O+",
-            urgency: "Medium",
-            location: "Kaiser Permanente",
-            amount: "150ml",
-            message:
-                "Looking for O+ donors for a patient in need. Non-urgent but appreciated.",
-            status: "Responded",
-            createdAt: "2024-01-14",
-            distance: "4.1 miles",
-        },
-    ]);
-
-    const [newRequest, setNewRequest] = useState({
-        bloodType: "",
-        urgency: "",
-        location: "",
-        amount: "",
-        message: "",
-    });
-
-    const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-    const urgencyLevels = ["Low", "Medium", "High", "Critical"];
-
-    const handleNewRequestChange = (field: string, value: string) => {
-        setNewRequest((prev) => ({ ...prev, [field]: value }));
-    };
-
-    const handleSubmitRequest = () => {
-        const request = {
-            id: Date.now(),
-            ...newRequest,
-            status: "Active",
-            createdAt: new Date().toISOString().split("T")[0],
-            responses: 0,
-        };
-        setRequestsMade((prev) => [request, ...prev]);
-        setNewRequest({
-            bloodType: "",
-            urgency: "",
-            location: "",
-            amount: "",
-            message: "",
-        });
-        setIsNewRequestOpen(false);
-        console.log("[v0] New request submitted:", request);
-    };
-
-    const handleRespondToRequest = (
-        requestId: number,
-        response: "accept" | "decline"
-    ) => {
-        setRequestsReceived((prev) =>
-            prev.map((req) =>
-                req.id === requestId
-                    ? {
-                          ...req,
-                          status:
-                              response === "accept" ? "Accepted" : "Declined",
-                      }
-                    : req
-            )
-        );
-        console.log("[v0] Responded to request:", requestId, response);
-    };
-
     if (user === null) {
         redirect("/");
     }
@@ -209,21 +99,7 @@ export default function ProfilePage() {
     }
 
     if (user === undefined) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-rose-50/30 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mb-6">
-                        <Loader2 className="h-8 w-8 text-white animate-spin" />
-                    </div>
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                        Loading your profile...
-                    </h2>
-                    <p className="text-gray-600">
-                        Please wait while we fetch your information.
-                    </p>
-                </div>
-            </div>
-        );
+        return <Loader title="Loading Profile..." />;
     }
 
     return (
@@ -418,18 +294,7 @@ export default function ProfilePage() {
 
                     {/* Requests Tab Content */}
                     <TabsContent value="requests" className="space-y-6">
-                        <RequestsTab
-                            isNewRequestOpen={isNewRequestOpen}
-                            setIsNewRequestOpen={setIsNewRequestOpen}
-                            requestsMade={requestsMade}
-                            requestsReceived={requestsReceived}
-                            newRequest={newRequest}
-                            bloodTypes={bloodTypes}
-                            urgencyLevels={urgencyLevels}
-                            handleNewRequestChange={handleNewRequestChange}
-                            handleSubmitRequest={handleSubmitRequest}
-                            handleRespondToRequest={handleRespondToRequest}
-                        />
+                        <RequestsTab />
                     </TabsContent>
 
                     {/* History Tab Content */}

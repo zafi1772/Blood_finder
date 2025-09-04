@@ -47,12 +47,12 @@ export default function Navbar() {
                     )}
 
                     {isSignedIn && (
-                        <a
+                        <Link
                             href="/profile"
                             className="text-foreground hover:text-primary transition-colors font-medium"
                         >
                             Profile
-                        </a>
+                        </Link>
                     )}
 
                     <UserAuth />

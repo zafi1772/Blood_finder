@@ -47,22 +47,28 @@ export const getUserProfileData = query({
 
         if (user !== null) {
             const allDonations = await ctx.db
-                .query("donationRequests")
-                .withSearchIndex("searchDonor", (q) =>
-                    q.search("donorId", user._id).eq("donationStatus", true)
+                .query("donationRequestsToDonors")
+                .withSearchIndex("searchDonorId", (q) =>
+                    q
+                        .search("donorId", user._id)
+                        .eq("donationStatus", "Fulfilled")
                 )
                 .collect();
 
             totalDonations = allDonations.length;
-            lastDonated =
-                allDonations.sort(
-                    (a, b) => b._creationTime - a._creationTime
-                )[0]?._creationTime || null;
+            if (totalDonations > 0) {
+                lastDonated =
+                    allDonations.sort(
+                        (a, b) => (b.donationTime ?? 0) - (a.donationTime ?? 0)
+                    )[0]?.donationTime || null;
+            }
 
             totalDonationsReceived = await ctx.db
                 .query("donationRequests")
-                .withSearchIndex("searchReceiver", (q) =>
-                    q.search("receiverId", user._id).eq("donationStatus", true)
+                .withSearchIndex("searchReceiverId", (q) =>
+                    q
+                        .search("receiverId", user._id)
+                        .eq("requestStatus", "Fulfilled")
                 )
                 .collect()
                 .then((donations) => donations.length);
@@ -70,11 +76,75 @@ export const getUserProfileData = query({
 
         return {
             ...user,
-            exists: true,
+            exists: user !== null,
             totalDonations,
             lastDonated,
             totalDonationsReceived,
         };
+    },
+});
+
+export const getDonationRequests = query({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return null;
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+
+        if (user) {
+            const requestsMade = await ctx.db
+                .query("donationRequests")
+                .withSearchIndex("searchReceiverId", (q) =>
+                    q.search("receiverId", user._id)
+                )
+                .collect();
+            const requestResponses: Record<string, number> = {};
+            for (const request of requestsMade) {
+                const responses = await ctx.db
+                    .query("donationRequestsToDonors")
+                    .withSearchIndex("searchRequestId", (q) =>
+                        q.search("requestId", request._id)
+                    )
+                    .filter(
+                        (q) =>
+                            q.eq(
+                                q.field("requestResponseStatus"),
+                                "Accepted"
+                            ) ||
+                            q.eq(q.field("requestResponseStatus"), "Rejected")
+                    )
+                    .collect();
+                requestResponses[request._id.toString()] = responses.length;
+            }
+
+            const requestReceived = await ctx.db
+                .query("donationRequestsToDonors")
+                .withSearchIndex("searchDonorId", (q) =>
+                    q.search("donorId", user._id)
+                )
+                .collect();
+            const detailedRequestsReceived = [];
+            for (const request of requestReceived) {
+                const originalRequest = await ctx.db
+                    .query("donationRequests")
+                    .withIndex("by_id", (q) => q.eq("_id", request.requestId))
+                    .first();
+                if (originalRequest) {
+                    detailedRequestsReceived.push(originalRequest);
+                }
+            }
+
+            return { requestsMade, requestResponses, requestReceived, detailedRequestsReceived };
+        }
+
+        return null;
     },
 });
 
