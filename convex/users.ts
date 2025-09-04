@@ -141,7 +141,12 @@ export const getDonationRequests = query({
                 }
             }
 
-            return { requestsMade, requestResponses, requestReceived, detailedRequestsReceived };
+            return {
+                requestsMade,
+                requestResponses,
+                requestReceived,
+                detailedRequestsReceived,
+            };
         }
 
         return null;
@@ -244,6 +249,38 @@ export const updateUserProfileData = mutation({
             return true;
         } catch (error) {
             console.error("[User Profile Update Error]", error);
+            return false;
+        }
+    },
+});
+
+export const updateDonationStatus = mutation({
+    args: {
+        isDonating: v.boolean(),
+    },
+    handler: async (ctx, { isDonating }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return false;
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (user === null) {
+            return false;
+        }
+
+        try {
+            await ctx.db.patch(user._id, {
+                isDonating,
+            });
+            return true;
+        } catch (error) {
+            console.error("[User Donation Status Update Error]", error);
             return false;
         }
     },

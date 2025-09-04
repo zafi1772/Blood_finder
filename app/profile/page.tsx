@@ -304,7 +304,7 @@ export default function ProfilePage() {
 
                     {/* Settings Tab Content - Placeholder */}
                     <TabsContent value="settings" className="space-y-6">
-                        <SettingsTab />
+                        <SettingsTab donationStatus={user && user.exists && user.isDonating === true} />
                     </TabsContent>
                 </Tabs>
             </div>

@@ -29,7 +29,7 @@ import {
     X,
     Navigation,
 } from "lucide-react";
-import { toast } from "sonner";
+import { showToast } from "@/components/others/extras";
 
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -208,23 +208,9 @@ export default function ProfileTab({ user }: ProfileTabProps) {
             });
 
             if (updated) {
-                toast("Profile updated successfully", {
-                    position: "top-center",
-                    style: {
-                        border: "1px solid var(--accent)",
-                        backdropFilter: "blur(8px)",
-                    },
-                });
+                showToast({ title: "Profile updated successfully" });
             } else {
-                toast("Failed to update profile", {
-                    position: "top-center",
-                    style: {
-                        background: "var(--destructive)",
-                        color: "var(--destructive-foreground)",
-                        border: "1px solid var(--destructive)",
-                        backdropFilter: "blur(8px)",
-                    },
-                });
+                showToast({ title: "Failed to update profile" });
             }
 
             setIsEditing(false);
