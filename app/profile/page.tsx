@@ -22,6 +22,7 @@ import Loader from "@/components/others/loader";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { redirect } from "next/navigation";
+import { getFormattedDateTime } from "@/lib/utils";
 
 export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState("profile");
@@ -153,18 +154,9 @@ export default function ProfilePage() {
                                             <Calendar className="h-4 w-4" />
                                             <span className="text-sm">
                                                 Since{" "}
-                                                {user._creationTime
-                                                    ? new Date(
-                                                          user._creationTime
-                                                      ).toLocaleString(
-                                                          "en-US",
-                                                          {
-                                                              month: "long",
-                                                              year: "numeric",
-                                                              day: "numeric",
-                                                          }
-                                                      )
-                                                    : "Unknown"}
+                                                {getFormattedDateTime(
+                                                    user._creationTime
+                                                )}
                                             </span>
                                         </div>
                                     </div>
@@ -224,18 +216,9 @@ export default function ProfilePage() {
                                                 </div>
                                                 <div className="flex flex-col justify-center">
                                                     <div className="text-2xl font-bold text-foreground/90">
-                                                        {user.lastDonated
-                                                            ? new Date(
-                                                                  user.lastDonated
-                                                              ).toLocaleString(
-                                                                  "en-US",
-                                                                  {
-                                                                      month: "long",
-                                                                      year: "numeric",
-                                                                      day: "numeric",
-                                                                  }
-                                                              )
-                                                            : "Unknown"}
+                                                        {getFormattedDateTime(
+                                                            user.lastDonated
+                                                        )}
                                                     </div>
                                                     <div className="text-xs font-medium tracking-wider text-muted-foreground">
                                                         LAST DONATION
@@ -304,7 +287,11 @@ export default function ProfilePage() {
 
                     {/* Settings Tab Content - Placeholder */}
                     <TabsContent value="settings" className="space-y-6">
-                        <SettingsTab donationStatus={user && user.exists && user.isDonating === true} />
+                        <SettingsTab
+                            donationStatus={
+                                user && user.exists && user.isDonating === true
+                            }
+                        />
                     </TabsContent>
                 </Tabs>
             </div>

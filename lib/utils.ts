@@ -8,6 +8,30 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+export function getFormattedDateTime(
+    dateTime: string | number | undefined | null,
+    short: boolean = true
+) {
+    if (dateTime === undefined || dateTime === null) {
+        return "Unknown";
+    }
+
+    if (short) {
+        return new Date(dateTime).toLocaleString("en-US", {
+            day: "2-digit",
+            month: "short",
+            year: "2-digit",
+        });
+    }
+    return new Date(dateTime).toLocaleString("en-US", {
+        day: "2-digit",
+        month: "short",
+        year: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
+
 export const getStatusColor = (status: string) => {
     switch (status) {
         case "Active":

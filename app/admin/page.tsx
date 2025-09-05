@@ -62,6 +62,7 @@ import {
     Download,
     Target,
 } from "lucide-react";
+import { getFormattedDateTime } from "@/lib/utils";
 
 const users = [
     {
@@ -806,9 +807,9 @@ export default function AdminDashboard() {
                                                     <TableCell>
                                                         <div className="flex items-center text-sm">
                                                             <Calendar className="w-3 h-3 mr-2 text-muted-foreground" />
-                                                            {new Date(
+                                                            {getFormattedDateTime(
                                                                 user.joinDate
-                                                            ).toLocaleDateString()}
+                                                            )}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -925,9 +926,9 @@ export default function AdminDashboard() {
                                                                                             Joined:
                                                                                         </span>
                                                                                         <span>
-                                                                                            {new Date(
+                                                                                            {getFormattedDateTime(
                                                                                                 user.joinDate
-                                                                                            ).toLocaleDateString()}
+                                                                                            )}
                                                                                         </span>
                                                                                     </div>
                                                                                     {user.type ===
@@ -951,9 +952,9 @@ export default function AdminDashboard() {
                                                                                                 </span>
                                                                                                 <span>
                                                                                                     {user.lastDonation
-                                                                                                        ? new Date(
+                                                                                                        ? getFormattedDateTime(
                                                                                                               user.lastDonation
-                                                                                                          ).toLocaleDateString()
+                                                                                                          )
                                                                                                         : "Never"}
                                                                                                 </span>
                                                                                             </div>
@@ -1224,9 +1225,9 @@ export default function AdminDashboard() {
                                                     <TableCell>
                                                         <div className="flex items-center text-sm">
                                                             <Calendar className="w-3 h-3 mr-2 text-muted-foreground" />
-                                                            {new Date(
+                                                            {getFormattedDateTime(
                                                                 request.neededBy
-                                                            ).toLocaleDateString()}
+                                                            )}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -1374,9 +1375,9 @@ export default function AdminDashboard() {
                                                                                             Requested:
                                                                                         </span>
                                                                                         <span>
-                                                                                            {new Date(
+                                                                                            {getFormattedDateTime(
                                                                                                 request.requestDate
-                                                                                            ).toLocaleDateString()}
+                                                                                            )}
                                                                                         </span>
                                                                                     </div>
                                                                                     <div className="flex justify-between">
@@ -1385,9 +1386,9 @@ export default function AdminDashboard() {
                                                                                             By:
                                                                                         </span>
                                                                                         <span className="font-semibold">
-                                                                                            {new Date(
+                                                                                            {getFormattedDateTime(
                                                                                                 request.neededBy
-                                                                                            ).toLocaleDateString()}
+                                                                                            )}
                                                                                         </span>
                                                                                     </div>
                                                                                     <div className="flex justify-between">

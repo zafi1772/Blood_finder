@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { History } from "lucide-react";
+import { getFormattedDateTime } from "@/lib/utils";
 
 interface DonationHistory {
     id: number;
@@ -43,15 +44,6 @@ export default function HistoryTab({ donationHistory }: HistoryTabProps) {
             default:
                 return "bg-gray-100 text-gray-800 border-gray-200";
         }
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
     };
 
     return (
@@ -92,7 +84,9 @@ export default function HistoryTab({ donationHistory }: HistoryTabProps) {
 
                                     <div className="text-sm">
                                         <span className="font-medium">
-                                            {formatDate(donation.date)}
+                                            {getFormattedDateTime(
+                                                donation.date
+                                            )}
                                         </span>
                                     </div>
 

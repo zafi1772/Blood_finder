@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, MessageSquare, CheckCircle, XCircle } from "lucide-react";
 import Loader from "@/components/others/loader";
 import { getUrgencyIcon } from "@/components/others/extras";
-import { getStatusColor } from "@/lib/utils";
+import { getFormattedDateTime, getStatusColor } from "@/lib/utils";
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -72,7 +72,10 @@ export default function RequestsTab() {
                                                     </Badge>
                                                 </div>
                                                 <span className="text-sm text-muted-foreground">
-                                                    {request._creationTime}
+                                                    {getFormattedDateTime(
+                                                        request._creationTime,
+                                                        false
+                                                    )}
                                                 </span>
                                             </div>
                                             <h4 className="font-semibold mb-2">
@@ -152,12 +155,13 @@ export default function RequestsTab() {
                                                         </Badge>
                                                     </div>
                                                     <span className="text-sm text-muted-foreground">
-                                                        {
+                                                        {getFormattedDateTime(
                                                             data
                                                                 .requestReceived[
                                                                 idx
-                                                            ]._creationTime
-                                                        }
+                                                            ]._creationTime,
+                                                            false
+                                                        )}
                                                     </span>
                                                 </div>
                                                 <h4 className="font-semibold mb-1">
