@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+    Form,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormControl,
+    FormMessage,
+} from "@/components/ui/form";
 import {
     Select,
     SelectContent,
@@ -19,41 +25,123 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { BLOOD_TYPES, URGENCY_LEVELS } from "@/lib/utils";
-import { Plus } from "lucide-react";
+import { BLOOD_TYPES, cn, URGENCY_LEVELS } from "@/lib/utils";
+import { Navigation, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { showToast } from "../others/extras";
+
+const donationRequestSchema = z.object({
+    bloodType: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], {
+        message: "Please select a valid blood type",
+    }),
+    urgency: z.enum(["Low", "Medium", "High", "Critical"], {
+        message: "Urgency must be one of Low, Medium, High, Critical",
+    }),
+    location: z.string().min(1, "Location is required"),
+    addressCoordinate: z.object({
+        latitude: z
+            .number()
+            .min(-90, "Invalid latitude")
+            .max(90, "Invalid latitude")
+            .refine((val) => val !== 0, "Please get your current location"),
+        longitude: z
+            .number()
+            .min(-180, "Invalid longitude")
+            .max(180, "Invalid longitude")
+            .refine((val) => val !== 0, "Please get your current location"),
+    }),
+    amount: z.string().min(1, "Amount is required"),
+    message: z.string().optional(),
+});
+type DonationRequestForm = z.infer<typeof donationRequestSchema>;
 
 export default function NewDonationRequest() {
     const [isNewRequestOpen, setIsNewRequestOpen] = useState(false);
-    const [newRequest, setNewRequest] = useState({
-        bloodType: "",
-        urgency: "",
-        location: "",
-        amount: "",
-        message: "",
-    });
+    const [isGettingLocation, setIsGettingLocation] = useState(false);
+    const createDonationRequest = useMutation(
+        api.donationRequests.createDonationRequest
+    );
 
-    const handleNewRequestChange = (field: string, value: string) => {
-        setNewRequest((prev) => ({ ...prev, [field]: value }));
-    };
-
-    const handleSubmitRequest = () => {
-        const request = {
-            id: Date.now(),
-            ...newRequest,
-            status: "Active",
-            createdAt: new Date().toISOString().split("T")[0],
-            responses: 0,
-        };
-        setNewRequest({
-            bloodType: "",
-            urgency: "",
+    const form = useForm<DonationRequestForm>({
+        resolver: zodResolver(donationRequestSchema),
+        defaultValues: {
+            bloodType: "A+",
+            urgency: undefined,
             location: "",
             amount: "",
             message: "",
+            addressCoordinate: { latitude: 0, longitude: 0 },
+        },
+    });
+
+    const getCurrentLocation = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by this browser.");
+            return;
+        }
+        setIsGettingLocation(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                form.setValue("addressCoordinate", {
+                    latitude: parseFloat(latitude.toFixed(6)),
+                    longitude: parseFloat(longitude.toFixed(6)),
+                });
+                setIsGettingLocation(false);
+            },
+            (error) => {
+                console.error("Error getting location:", error);
+                let errorMessage = "Unable to get your location.";
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = "Location access denied by user.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = "Location information is unavailable.";
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = "Location request timed out.";
+                        break;
+                }
+                alert(errorMessage);
+                setIsGettingLocation(false);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+            }
+        );
+    };
+
+    const onSubmit = async (data: DonationRequestForm) => {
+        const res = await createDonationRequest({
+            bloodType: data.bloodType,
+            amountNeeded: data.amount,
+            urgencyLevel: data.urgency,
+            addressText: data.location,
+            addressLatitude: data.addressCoordinate.latitude,
+            addressLongitude: data.addressCoordinate.longitude,
+            requestStatus: "Active",
+            message: data.message || "",
         });
-        setIsNewRequestOpen(false);
-        console.log("New request submitted:", request);
+
+        if (res) {
+            showToast({ title: "Donation request created successfully" });
+            form.reset();
+            setIsNewRequestOpen(false);
+        } else {
+            showToast({
+                title: "Failed to create donation request. Please try again.",
+            });
+        }
     };
 
     return (
@@ -76,111 +164,195 @@ export default function NewDonationRequest() {
                             compatible donors in your area.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="request-blood-type">
-                                Blood Type Needed
-                            </Label>
-                            <Select
-                                value={newRequest.bloodType}
-                                onValueChange={(value) =>
-                                    handleNewRequestChange("bloodType", value)
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select blood type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {BLOOD_TYPES.map((type) => (
-                                        <SelectItem key={type} value={type}>
-                                            {type}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="request-amount">
-                                Amount Needed
-                            </Label>
-                            <Input
-                                id="request-amount"
-                                value={newRequest.amount}
-                                onChange={(e) =>
-                                    handleNewRequestChange(
-                                        "amount",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="e.g., 200ml, 450ml"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="request-urgency">
-                                Urgency Level
-                            </Label>
-                            <Select
-                                value={newRequest.urgency}
-                                onValueChange={(value) =>
-                                    handleNewRequestChange("urgency", value)
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select urgency" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {URGENCY_LEVELS.map((level) => (
-                                        <SelectItem key={level} value={level}>
-                                            {level}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="request-location">
-                                Hospital/Location
-                            </Label>
-                            <Input
-                                id="request-location"
-                                value={newRequest.location}
-                                onChange={(e) =>
-                                    handleNewRequestChange(
-                                        "location",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter hospital or location"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="request-message">Message</Label>
-                            <Textarea
-                                id="request-message"
-                                value={newRequest.message}
-                                onChange={(e) =>
-                                    handleNewRequestChange(
-                                        "message",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Provide details about the blood need..."
-                                rows={3}
-                            />
-                        </div>
-                        <Button
-                            onClick={handleSubmitRequest}
-                            className="w-full"
-                            disabled={
-                                !newRequest.bloodType ||
-                                !newRequest.urgency ||
-                                !newRequest.location ||
-                                !newRequest.amount
-                            }
+                    <Form {...form}>
+                        <form
+                            className="flex flex-col gap-4 py-4"
+                            onSubmit={form.handleSubmit(onSubmit)}
                         >
-                            Submit Request
-                        </Button>
-                    </div>
+                            <FormField
+                                control={form.control}
+                                name="bloodType"
+                                render={({ field, fieldState }) => (
+                                    <FormItem>
+                                        <FormLabel>Blood Type Needed</FormLabel>
+                                        <FormControl>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
+                                                <SelectTrigger
+                                                    className={cn("w-full", {
+                                                        "border-red-500":
+                                                            fieldState.error,
+                                                    })}
+                                                >
+                                                    <SelectValue placeholder="Select blood type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {BLOOD_TYPES.map((type) => (
+                                                        <SelectItem
+                                                            key={type}
+                                                            value={type}
+                                                        >
+                                                            {type}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="amount"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Amount Needed</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="e.g., 200ml, 450ml"
+                                                autoComplete="off"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="urgency"
+                                render={({ field, fieldState }) => (
+                                    <FormItem>
+                                        <FormLabel>Urgency Level</FormLabel>
+                                        <FormControl>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
+                                                <SelectTrigger
+                                                    className={cn("w-full", {
+                                                        "border-red-500":
+                                                            fieldState.error,
+                                                    })}
+                                                >
+                                                    <SelectValue placeholder="Select urgency" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {URGENCY_LEVELS.map(
+                                                        (level) => (
+                                                            <SelectItem
+                                                                key={level}
+                                                                value={level}
+                                                            >
+                                                                {level}
+                                                            </SelectItem>
+                                                        )
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="location"
+                                render={({ field, fieldState }) => (
+                                    <FormItem>
+                                        <FormLabel>Hospital/Location</FormLabel>
+                                        <FormControl>
+                                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                                <Input
+                                                    className={cn({
+                                                        "border-red-500":
+                                                            fieldState.error,
+                                                    })}
+                                                    placeholder="Enter hospital or location"
+                                                    autoComplete="off"
+                                                    {...field}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                        form.clearErrors(
+                                                            "addressCoordinate"
+                                                        );
+                                                        getCurrentLocation();
+                                                    }}
+                                                    disabled={isGettingLocation}
+                                                    className={cn(
+                                                        "w-full sm:w-auto",
+                                                        {
+                                                            "border-red-500":
+                                                                !!(
+                                                                    form
+                                                                        .formState
+                                                                        .errors
+                                                                        .addressCoordinate
+                                                                        ?.latitude ||
+                                                                    form
+                                                                        .formState
+                                                                        .errors
+                                                                        .addressCoordinate
+                                                                        ?.longitude
+                                                                ),
+                                                        }
+                                                    )}
+                                                >
+                                                    <Navigation className="h-5 w-5" />
+                                                    {isGettingLocation
+                                                        ? "Getting Location..."
+                                                        : "Detect Location"}
+                                                </Button>
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                        {form.formState.errors
+                                            .addressCoordinate &&
+                                            (form.formState.errors
+                                                .addressCoordinate.latitude ||
+                                                form.formState.errors
+                                                    .addressCoordinate
+                                                    .longitude) && (
+                                                <div className="text-sm font-medium text-destructive mt-1">
+                                                    {form.formState.errors
+                                                        .addressCoordinate
+                                                        .latitude?.message ||
+                                                        form.formState.errors
+                                                            .addressCoordinate
+                                                            .longitude?.message}
+                                                </div>
+                                            )}
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="message"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Message</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Provide details about the blood need..."
+                                                rows={3}
+                                                autoComplete="off"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            <Button type="submit" className="w-full">
+                                Submit Request
+                            </Button>
+                        </form>
+                    </Form>
                 </DialogContent>
             </Dialog>
         </div>

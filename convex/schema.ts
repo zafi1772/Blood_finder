@@ -49,7 +49,7 @@ export const DonationRequest = {
         v.literal("O+"),
         v.literal("O-")
     ),
-    amountNeeded: v.number(),
+    amountNeeded: v.string(),
     urgencyLevel: v.union(
         v.literal("Low"),
         v.literal("Medium"),
@@ -72,7 +72,6 @@ export const DonationRequestToDonor = {
     donorId: v.id("users"),
     requestResponseStatus: v.union(
         v.literal("Accepted"),
-        v.literal("Pending"),
         v.literal("Rejected")
     ),
     donationStatus: v.union(v.literal("Fulfilled"), v.literal("Pending")),

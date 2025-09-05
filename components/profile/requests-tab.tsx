@@ -19,7 +19,9 @@ import { api } from "@/convex/_generated/api";
 import NewDonationRequest from "./new-donation-request";
 
 export default function RequestsTab() {
-    const data = useQuery(api.users.getDonationRequests);
+    const data = useQuery(api.donationRequests.getDonationRequests);
+
+    console.log({ data });
 
     if (data === undefined) {
         return <Loader title="Loading Requests..." />;
@@ -150,14 +152,20 @@ export default function RequestsTab() {
                                                         </Badge>
                                                     </div>
                                                     <span className="text-sm text-muted-foreground">
-                                                        {data.requestReceived[idx]._creationTime}
+                                                        {
+                                                            data
+                                                                .requestReceived[
+                                                                idx
+                                                            ]._creationTime
+                                                        }
                                                     </span>
                                                 </div>
                                                 <h4 className="font-semibold mb-1">
                                                     {"Requester Name"}
                                                 </h4>
                                                 <p className="text-sm text-muted-foreground mb-2">
-                                                    {request.addressText} • {" "} km away
+                                                    {request.addressText} • km
+                                                    away
                                                 </p>
                                                 <p className="text-sm text-muted-foreground mb-3">
                                                     {request.message}
