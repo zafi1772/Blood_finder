@@ -48,11 +48,8 @@ export const getUserProfileData = query({
         if (user !== null) {
             const allDonations = await ctx.db
                 .query("donationRequestsToDonors")
-                .withSearchIndex("searchDonorId", (q) =>
-                    q
-                        .search("donorId", user._id)
-                        .eq("donationStatus", "Fulfilled")
-                )
+                .withIndex("indexDonorId", (q) => q.eq("donorId", user._id))
+                .filter((q) => q.eq(q.field("donationStatus"), "Fulfilled"))
                 .collect();
 
             totalDonations = allDonations.length;
@@ -65,11 +62,10 @@ export const getUserProfileData = query({
 
             totalDonationsReceived = await ctx.db
                 .query("donationRequests")
-                .withSearchIndex("searchReceiverId", (q) =>
-                    q
-                        .search("receiverId", user._id)
-                        .eq("requestStatus", "Fulfilled")
+                .withIndex("indexReceiverId", (q) =>
+                    q.eq("receiverId", user._id)
                 )
+                .filter((q) => q.eq(q.field("requestStatus"), "Fulfilled"))
                 .collect()
                 .then((donations) => donations.length);
         }

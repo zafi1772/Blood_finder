@@ -18,16 +18,16 @@ export const getDonationRequests = query({
         if (user) {
             const requestsMade = await ctx.db
                 .query("donationRequests")
-                .withSearchIndex("searchReceiverId", (q) =>
-                    q.search("receiverId", user._id)
+                .withIndex("indexReceiverId", (q) =>
+                    q.eq("receiverId", user._id)
                 )
                 .collect();
             const requestResponses: Record<string, number> = {};
             for (const request of requestsMade) {
                 const responses = await ctx.db
                     .query("donationRequestsToDonors")
-                    .withSearchIndex("searchRequestId", (q) =>
-                        q.search("requestId", request._id)
+                    .withIndex("indexRequestId", (q) =>
+                        q.eq("requestId", request._id)
                     )
                     .filter(
                         (q) =>
@@ -43,9 +43,6 @@ export const getDonationRequests = query({
 
             const requestReceived = await ctx.db
                 .query("donationRequestsToDonors")
-                .withSearchIndex("searchDonorId", (q) =>
-                    q.search("donorId", user._id)
-                )
                 .collect();
             const detailedRequestsReceived = [];
             for (const request of requestReceived) {

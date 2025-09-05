@@ -88,37 +88,11 @@ export const Conversation = {
 
 export default defineSchema({
     users: defineTable(User).index("indexEmail", ["email"]),
-    donationRequests: defineTable(DonationRequest).searchIndex(
-        "searchReceiverId",
-        {
-            searchField: "receiverId",
-            filterFields: ["requestStatus"],
-        }
-    ),
+    donationRequests: defineTable(DonationRequest).index("indexReceiverId", [
+        "receiverId",
+    ]),
     donationRequestsToDonors: defineTable(DonationRequestToDonor)
-        .searchIndex("searchRequestId", {
-            searchField: "requestId",
-            filterFields: [
-                "donorId",
-                "requestResponseStatus",
-                "donationStatus",
-            ],
-        })
-        .searchIndex("searchDonorId", {
-            searchField: "donorId",
-            filterFields: [
-                "requestId",
-                "requestResponseStatus",
-                "donationStatus",
-            ],
-        })
-        .searchIndex("searchRequestResponseStatus", {
-            searchField: "requestResponseStatus",
-            filterFields: ["requestId", "donorId", "donationStatus"],
-        })
-        .searchIndex("searchDonationStatus", {
-            searchField: "donationStatus",
-            filterFields: ["requestId", "donorId", "requestResponseStatus"],
-        }),
+        .index("indexRequestId", ["requestId"])
+        .index("indexDonorId", ["donorId"]),
     conversations: defineTable(Conversation),
 });
