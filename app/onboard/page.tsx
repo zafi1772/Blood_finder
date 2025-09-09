@@ -30,13 +30,15 @@ import {
 import { redirect } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { showToast } from "@/components/others/extras";
+import { addUserLocations } from "@/lib/actions";
 
 const onboardSchema = z.object({
     fullName: z
         .string()
         .min(2, "Full name must be at least 2 characters")
         .max(50, "Full name must not exceed 50 characters"),
-    email: z.string().optional(), 
+    email: z.string().optional(),
     phoneNumber: z
         .string()
         .min(10, "Phone number must be exactly 10 digits")
@@ -206,7 +208,7 @@ export default function OnboardPage() {
                 return;
             }
 
-            await createUser({
+            const res = await createUser({
                 userData: {
                     ...data,
                     email: userEmail,
@@ -216,6 +218,21 @@ export default function OnboardPage() {
                     accountStatus: true,
                 },
             });
+            if (res.success && res.id) {
+                showToast({ title: "Account created successfully" });
+                await addUserLocations([
+                    {
+                        _id: res.id,
+                        latitude: data.addressCoordinate.latitude,
+                        longitude: data.addressCoordinate.longitude,
+                    },
+                ]);
+            } else {
+                showToast({
+                    title: "Account creation failed",
+                    isWarning: true,
+                });
+            }
         } catch (error) {
             console.error("Submission error:", error);
         } finally {

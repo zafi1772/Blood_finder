@@ -225,11 +225,11 @@ export const createUser = mutation({
     handler: async (ctx, { userData }) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
-            return false;
+            return { id: null, success: false };
         }
 
         if (!identity.emailVerified) {
-            return false;
+            return { id: null, success: false };
         }
 
         const existingUser = await ctx.db
@@ -240,7 +240,7 @@ export const createUser = mutation({
             .first();
 
         if (existingUser) {
-            return false;
+            return { id: null, success: false };
         }
 
         try {
@@ -249,11 +249,11 @@ export const createUser = mutation({
                 email: identity.email as string,
             };
 
-            await ctx.db.insert("users", userDataWithCorrectEmail);
-            return true;
+            const id = await ctx.db.insert("users", userDataWithCorrectEmail);
+            return { id, success: true };
         } catch (error) {
             console.error("[User Creation Error]", error);
-            return false;
+            return { id: null, success: false };
         }
     },
 });
