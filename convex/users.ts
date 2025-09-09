@@ -120,6 +120,117 @@ export const createUser = mutation({
     },
 });
 
+export const getAdminOverviewData = query({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return null;
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (user === null || !user.isAdmin) {
+            return null;
+        }
+
+        const allUsers = await ctx.db.query("users").collect();
+
+        const now = new Date();
+        const startOfThisMonth = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1
+        ).getTime();
+        const startOfLastMonth = new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            1
+        ).getTime();
+        const endOfLastMonth = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            0
+        ).getTime();
+        const usersThisMonth = allUsers.filter(
+            (u) => u._creationTime && u._creationTime >= startOfThisMonth
+        );
+        const usersLastMonth = allUsers.filter(
+            (u) =>
+                u._creationTime &&
+                u._creationTime >= startOfLastMonth &&
+                u._creationTime <= endOfLastMonth
+        );
+
+        const totalUsers = allUsers.length;
+        const userSignupGrowth =
+            usersLastMonth.length === 0
+                ? usersThisMonth.length * 100
+                : ((usersThisMonth.length - usersLastMonth.length) /
+                      usersLastMonth.length) *
+                  100;
+
+        const activeDonors = await ctx.db
+            .query("users")
+            .filter((q) => q.eq(q.field("isDonating"), true))
+            .collect()
+            .then((r) => r.length);
+
+        const donationRequests = await ctx.db
+            .query("donationRequests")
+            .filter((q) => q.eq(q.field("requestStatus"), "Active"))
+            .collect();
+
+        const totalDonationRequests = donationRequests.length;
+        const urgentRequests = donationRequests.filter(
+            (req) =>
+                req.urgencyLevel === "High" || req.urgencyLevel === "Critical"
+        ).length;
+
+        const allDonationsMade = await ctx.db
+            .query("donationRequestsToDonors")
+            .filter((q) => q.eq(q.field("donationStatus"), "Fulfilled"))
+            .collect();
+
+        const startOfToday = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+        ).getTime();
+        const endOfToday = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate() + 1
+        ).getTime();
+
+        const totalDonationsMade = allDonationsMade.length;
+        const donationsToday = allDonationsMade.filter(
+            (donation) =>
+                donation.donationTime !== undefined &&
+                donation.donationTime >= startOfToday &&
+                donation.donationTime < endOfToday
+        ).length;
+
+        const activeDonationRequests = donationRequests.filter(
+            (req) => req.requestStatus === "Active"
+        ).length;
+
+        return {
+            totalUsers,
+            userSignupGrowth,
+            activeDonors,
+            totalDonationRequests,
+            urgentRequests,
+            totalDonationsMade,
+            donationsToday,
+            activeDonationRequests,
+        };
+    },
+});
+
 export const updateUserProfileData = mutation({
     args: {
         phoneNumber: v.string(),
