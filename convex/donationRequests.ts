@@ -71,7 +71,7 @@ export const getDonationRequestsByIds = query({
                 q.eq("email", identity.email as string)
             )
             .first();
-        if (!user) {
+        if (!user || !user.isDonating) {
             return { requests: [], userNames: [] };
         }
         const userId = user._id;

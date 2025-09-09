@@ -79,7 +79,7 @@ export default function NearbyDonationRequests() {
             }
         };
 
-        if (user && user.addressCoordinate && searchRadius) {
+        if (user && user.isDonating && user.addressCoordinate && searchRadius) {
             fetchNearbyRequests(
                 user.addressCoordinate.longitude,
                 user.addressCoordinate.latitude,
