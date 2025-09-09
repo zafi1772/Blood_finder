@@ -2,13 +2,15 @@
 
 import { Heart } from "lucide-react";
 import UserAuth from "@/components/home/user-auth";
-import { useClerk } from "@clerk/nextjs";
-import { usePathname } from "next/navigation";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function Navbar() {
     const pathname = usePathname();
-    const { isSignedIn } = useClerk();
+    const user = useQuery(api.users.getUserProfileData);
 
     return (
         <header className="border-b glass-card sticky top-0 z-50">
@@ -46,12 +48,21 @@ export default function Navbar() {
                         </>
                     )}
 
-                    {isSignedIn && (
+                    {user && pathname !== "/profile" && (
                         <Link
                             href="/profile"
                             className="text-foreground hover:text-primary transition-colors font-medium"
                         >
                             Profile
+                        </Link>
+                    )}
+
+                    {user && user.isAdmin && pathname !== "/admin" && (
+                        <Link
+                            href="/admin"
+                            className="text-foreground hover:text-primary transition-colors font-medium"
+                        >
+                            Admin Panel
                         </Link>
                     )}
 
