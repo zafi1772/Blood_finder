@@ -1,4 +1,5 @@
-import { query } from "./_generated/server";
+import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
 export const getUserDonationHistory = query({
     handler: async (ctx) => {
@@ -43,5 +44,53 @@ export const getUserDonationHistory = query({
         }
 
         return donationRecords;
+    },
+});
+
+export const createDonationRequestToDonor = mutation({
+    args: {
+        requestId: v.id("donationRequests"),
+        requestResponseStatus: v.union(
+            v.literal("Accepted"),
+            v.literal("Declined")
+        ),
+    },
+    handler: async (ctx, { requestId, requestResponseStatus }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return false;
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (!user) {
+            return false;
+        }
+
+        const existingRequest = await ctx.db
+            .query("donationRequestsToDonors")
+            .withIndex("indexRequestId", (q) => q.eq("requestId", requestId))
+            .filter((q) => q.eq(q.field("donorId"), user._id))
+            .first();
+        if (existingRequest) {
+            return false;
+        }
+
+        try {
+            await ctx.db.insert("donationRequestsToDonors", {
+                requestId,
+                donorId: user._id,
+                donationStatus: "Pending",
+                requestResponseStatus,
+            });
+            return true;
+        } catch (error) {
+            console.error("[Error creating donation request to donor]", error);
+            return false;
+        }
     },
 });

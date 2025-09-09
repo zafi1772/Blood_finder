@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-export const getDonationRequests = query({
+export const getUserMadeDonationRequests = query({
     handler: async (ctx) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
@@ -41,29 +41,90 @@ export const getDonationRequests = query({
                 requestResponses[request._id.toString()] = responses.length;
             }
 
-            const requestReceived = await ctx.db
-                .query("donationRequestsToDonors")
-                .collect();
-            const detailedRequestsReceived = [];
-            for (const request of requestReceived) {
-                const originalRequest = await ctx.db
-                    .query("donationRequests")
-                    .withIndex("by_id", (q) => q.eq("_id", request.requestId))
-                    .first();
-                if (originalRequest) {
-                    detailedRequestsReceived.push(originalRequest);
-                }
-            }
-
             return {
                 requestsMade,
                 requestResponses,
-                requestReceived,
-                detailedRequestsReceived,
             };
         }
 
         return null;
+    },
+});
+
+export const getDonationRequestsByIds = query({
+    args: {
+        requestIds: v.array(v.id("donationRequests")),
+    },
+    handler: async (ctx, { requestIds }) => {
+        if (!requestIds) {
+            return { requests: [], userNames: [] };
+        }
+
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return { requests: [], userNames: [] };
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (!user) {
+            return { requests: [], userNames: [] };
+        }
+        const userId = user._id;
+
+        const declinedRequests = await ctx.db
+            .query("donationRequestsToDonors")
+            .withIndex("indexDonorId", (q) => q.eq("donorId", userId))
+            .filter((q) => q.eq(q.field("requestResponseStatus"), "Declined"))
+            .collect();
+
+        const requests = (
+            await Promise.all(
+                requestIds.map((id) =>
+                    ctx.db
+                        .query("donationRequests")
+                        .withIndex("by_id", (q) => q.eq("_id", id))
+                        .filter((q) => q.neq(q.field("receiverId"), userId))
+                        .filter((q) => q.eq(q.field("requestStatus"), "Active"))
+                        .first()
+                )
+            )
+        )
+            .filter((req) => req !== null)
+            .filter(
+                (req) =>
+                    !declinedRequests.some((dr) => dr.requestId === req._id)
+            );
+
+        const userNames = (
+            await Promise.all(requests.map((req) => ctx.db.get(req.receiverId)))
+        )
+            .filter((user) => user !== null)
+            .map(({ fullName }) => ({ fullName }));
+
+        const requestResponseStatus = (
+            await Promise.all(
+                requests.map((req) =>
+                    ctx.db
+                        .query("donationRequestsToDonors")
+                        .withIndex("indexRequestId", (q) =>
+                            q.eq("requestId", req._id)
+                        )
+                        .first()
+                )
+            )
+        )
+            .filter((res) => res !== null)
+            .map((res) => ({
+                requestId: res.requestId,
+                requestResponseStatus: res.requestResponseStatus,
+            }));
+
+        return { requests, userNames, requestResponseStatus };
     },
 });
 
@@ -111,7 +172,7 @@ export const createDonationRequest = mutation({
     ) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
-            return false;
+            return { id: null, success: false };
         }
 
         const user = await ctx.db
@@ -121,11 +182,11 @@ export const createDonationRequest = mutation({
             )
             .first();
         if (user === null) {
-            return false;
+            return { id: null, success: false };
         }
 
         try {
-            await ctx.db.insert("donationRequests", {
+            const id = await ctx.db.insert("donationRequests", {
                 receiverId: user._id,
                 bloodType,
                 amountNeeded,
@@ -136,10 +197,10 @@ export const createDonationRequest = mutation({
                 requestStatus,
                 message,
             });
-            return true;
+            return { id, success: true };
         } catch (error) {
             console.error("[Create Donation Request Error]", error);
-            return false;
+            return { id: null, success: false };
         }
     },
 });

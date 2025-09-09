@@ -72,7 +72,8 @@ export const DonationRequestToDonor = {
     donorId: v.id("users"),
     requestResponseStatus: v.union(
         v.literal("Accepted"),
-        v.literal("Rejected")
+        v.literal("Rejected"),
+        v.literal("Declined")
     ),
     donationStatus: v.union(v.literal("Fulfilled"), v.literal("Pending")),
     donationTime: v.optional(v.number()),
@@ -86,6 +87,10 @@ export const Conversation = {
     receiverId: v.id("users"),
 };
 
+export const Config = {
+    donorSearchRadiusInKm: v.number(),
+};
+
 export default defineSchema({
     users: defineTable(User).index("indexEmail", ["email"]),
     donationRequests: defineTable(DonationRequest).index("indexReceiverId", [
@@ -95,4 +100,5 @@ export default defineSchema({
         .index("indexRequestId", ["requestId"])
         .index("indexDonorId", ["donorId"]),
     conversations: defineTable(Conversation),
+    configs: defineTable(Config),
 });
