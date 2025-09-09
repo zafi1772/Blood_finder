@@ -128,6 +128,33 @@ export const getDonationRequestsByIds = query({
     },
 });
 
+export const getAllDonationRequestCoordinates = query({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return [];
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (user === null || !user.isAdmin) {
+            return [];
+        }
+
+        const requests = await ctx.db.query("donationRequests").collect();
+
+        return requests.map((req) => ({
+            _id: req._id,
+            longitude: req.addressLongitude,
+            latitude: req.addressLatitude,
+        }));
+    },
+});
+
 export const createDonationRequest = mutation({
     args: {
         bloodType: v.union(

@@ -36,7 +36,7 @@ import { z } from "zod";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { showToast } from "../others/extras";
-import { addDonationRequestLocation } from "@/lib/actions";
+import { addDonationRequestLocations } from "@/lib/actions";
 
 const donationRequestSchema = z.object({
     bloodType: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], {
@@ -135,11 +135,13 @@ export default function NewDonationRequest() {
         });
 
         if (res.id) {
-            await addDonationRequestLocation(
-                res.id,
-                data.addressCoordinate.longitude,
-                data.addressCoordinate.latitude
-            );
+            await addDonationRequestLocations([
+                {
+                    _id: res.id,
+                    longitude: data.addressCoordinate.longitude,
+                    latitude: data.addressCoordinate.latitude,
+                },
+            ]);
             showToast({ title: "Donation request created successfully" });
             form.reset();
             setIsNewRequestOpen(false);

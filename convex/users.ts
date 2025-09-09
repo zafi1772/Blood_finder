@@ -80,46 +80,6 @@ export const getUserProfileData = query({
     },
 });
 
-export const createUser = mutation({
-    args: {
-        userData: User,
-    },
-    handler: async (ctx, { userData }) => {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) {
-            return false;
-        }
-
-        if (!identity.emailVerified) {
-            return false;
-        }
-
-        const existingUser = await ctx.db
-            .query("users")
-            .withIndex("indexEmail", (q) =>
-                q.eq("email", identity.email as string)
-            )
-            .first();
-
-        if (existingUser) {
-            return false;
-        }
-
-        try {
-            const userDataWithCorrectEmail = {
-                ...userData,
-                email: identity.email as string,
-            };
-
-            await ctx.db.insert("users", userDataWithCorrectEmail);
-            return true;
-        } catch (error) {
-            console.error("[User Creation Error]", error);
-            return false;
-        }
-    },
-});
-
 export const getAdminOverviewData = query({
     handler: async (ctx) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -228,6 +188,73 @@ export const getAdminOverviewData = query({
             donationsToday,
             activeDonationRequests,
         };
+    },
+});
+
+export const getAddressCoordinatesOfAllUsers = query({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return [];
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (user === null || !user.isAdmin) {
+            return [];
+        }
+
+        const users = await ctx.db.query("users").collect();
+
+        return users.map((user) => ({
+            _id: user._id,
+            longitude: user.addressCoordinate.longitude,
+            latitude: user.addressCoordinate.latitude,
+        }));
+    },
+});
+
+export const createUser = mutation({
+    args: {
+        userData: User,
+    },
+    handler: async (ctx, { userData }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return false;
+        }
+
+        if (!identity.emailVerified) {
+            return false;
+        }
+
+        const existingUser = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+
+        if (existingUser) {
+            return false;
+        }
+
+        try {
+            const userDataWithCorrectEmail = {
+                ...userData,
+                email: identity.email as string,
+            };
+
+            await ctx.db.insert("users", userDataWithCorrectEmail);
+            return true;
+        } catch (error) {
+            console.error("[User Creation Error]", error);
+            return false;
+        }
     },
 });
 

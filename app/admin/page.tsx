@@ -7,8 +7,15 @@ import RecentActivity from "@/components/admin/recent-activity";
 import UsersManagement from "@/components/admin/users-management";
 import RequestsManagement from "@/components/admin/requests-management";
 import AnalyticsDashboard from "@/components/admin/analytics-dashboard";
+import SettingsTab from "@/components/admin/settings-tab";
 import Overview from "@/components/admin/overview";
-import { Users, Activity, AlertTriangle, BarChart3 } from "lucide-react";
+import {
+    Users,
+    Activity,
+    AlertTriangle,
+    BarChart3,
+    Settings,
+} from "lucide-react";
 
 const users = [
     {
@@ -217,6 +224,13 @@ export default function AdminDashboard() {
                             <Activity className="w-4 h-4" />
                             Analytics
                         </TabsTrigger>
+                        <TabsTrigger
+                            value="settings"
+                            className="flex items-center gap-2"
+                        >
+                            <Settings className="w-4 h-4" />
+                            Settings
+                        </TabsTrigger>
                     </TabsList>
 
                     {/* Overview Tab */}
@@ -231,12 +245,19 @@ export default function AdminDashboard() {
 
                     {/* Requests Tab */}
                     <TabsContent value="requests">
-                        <RequestsManagement donationRequests={donationRequests} />
+                        <RequestsManagement
+                            donationRequests={donationRequests}
+                        />
                     </TabsContent>
 
                     {/* Analytics Tab */}
                     <TabsContent value="analytics">
                         <AnalyticsDashboard />
+                    </TabsContent>
+
+                    {/* Settings Tab */}
+                    <TabsContent value="settings">
+                        <SettingsTab />
                     </TabsContent>
                 </Tabs>
             </div>

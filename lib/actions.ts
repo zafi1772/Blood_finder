@@ -1,25 +1,35 @@
 "use server";
 
+import redisClient from "@/lib/redis-client";
 import { Id } from "@/convex/_generated/dataModel";
 import { fetchQuery } from "convex/nextjs";
-import redisClient from "@/lib/redis-client";
 import { api } from "@/convex/_generated/api";
+import { getAuthToken } from "@/auth";
 
-export async function addUserLocation(
-    userId: string,
-    longitude: number,
-    latitude: number
+const USER_LOCATIONS_KEY = "user_locations";
+const DONATION_REQUEST_LOCATIONS_KEY = "donation_request_locations";
+
+export async function addUserLocations(
+    userLocations: { _id: string; longitude: number; latitude: number }[]
 ) {
+    const token = await getAuthToken();
+    if (!token) {
+        return false;
+    }
+
     if (redisClient.isOpen === false) {
         await redisClient.connect();
     }
 
     try {
-        await redisClient.geoAdd("user_locations", {
-            longitude,
-            latitude,
-            member: userId,
-        });
+        await redisClient.geoAdd(
+            USER_LOCATIONS_KEY,
+            userLocations.map((loc) => ({
+                longitude: loc.longitude,
+                latitude: loc.latitude,
+                member: loc._id,
+            }))
+        );
         return true;
     } catch (error) {
         console.error("Error adding user location to Redis:", error);
@@ -33,13 +43,18 @@ export async function getNearbyUsers(
     radius: number,
     unit: "m" | "km" | "mi" | "ft" = "km"
 ) {
+    const token = await getAuthToken();
+    if (!token) {
+        return false;
+    }
+
     if (redisClient.isOpen === false) {
         await redisClient.connect();
     }
 
     try {
         const users = await redisClient.GEORADIUS(
-            "user_locations",
+            USER_LOCATIONS_KEY,
             { longitude, latitude },
             radius,
             unit
@@ -51,21 +66,31 @@ export async function getNearbyUsers(
     }
 }
 
-export async function addDonationRequestLocation(
-    donationRequestId: string,
-    longitude: number,
-    latitude: number
+export async function addDonationRequestLocations(
+    donationRequestLocations: {
+        _id: string;
+        longitude: number;
+        latitude: number;
+    }[]
 ) {
+    const token = await getAuthToken();
+    if (!token) {
+        return false;
+    }
+
     if (redisClient.isOpen === false) {
         await redisClient.connect();
     }
 
     try {
-        await redisClient.geoAdd("donation_request_locations", {
-            longitude,
-            latitude,
-            member: donationRequestId,
-        });
+        await redisClient.geoAdd(
+            DONATION_REQUEST_LOCATIONS_KEY,
+            donationRequestLocations.map((loc) => ({
+                longitude: loc.longitude,
+                latitude: loc.latitude,
+                member: loc._id,
+            }))
+        );
         return true;
     } catch (error) {
         console.error(
@@ -82,13 +107,18 @@ export async function getNearbyDonationRequests(
     radius: number,
     unit: "m" | "km" | "mi" | "ft" = "km"
 ) {
+    const token = await getAuthToken();
+    if (!token) {
+        return false;
+    }
+
     if (redisClient.isOpen === false) {
         await redisClient.connect();
     }
 
     try {
         return (await redisClient.GEORADIUS(
-            "donation_request_locations",
+            DONATION_REQUEST_LOCATIONS_KEY,
             { longitude, latitude },
             radius,
             unit
@@ -99,5 +129,37 @@ export async function getNearbyDonationRequests(
             error
         );
         return [];
+    }
+}
+
+export async function syncLocations() {
+    const token = await getAuthToken();
+    if (!token) {
+        return false;
+    }
+
+    try {
+        const [userLocations, donationRequestLocations] = await Promise.all([
+            fetchQuery(
+                api.users.getAddressCoordinatesOfAllUsers,
+                {},
+                { token }
+            ),
+            fetchQuery(
+                api.donationRequests.getAllDonationRequestCoordinates,
+                {},
+                { token }
+            ),
+        ]);
+
+        return (
+            await Promise.all([
+                addUserLocations(userLocations),
+                addDonationRequestLocations(donationRequestLocations),
+            ])
+        ).every((res) => res);
+    } catch (error) {
+        console.error("[Error syncing locations to Redis]", error);
+        return false;
     }
 }
