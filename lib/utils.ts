@@ -42,6 +42,7 @@ export const getStatusColor = (status: string) => {
         case "Responded":
         case "Completed":
             return "bg-green-100 text-green-800 border-green-200";
+        case "Cancelled":
         case "Declined":
             return "bg-red-100 text-red-800 border-red-200";
         default:

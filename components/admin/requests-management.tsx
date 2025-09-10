@@ -29,7 +29,6 @@ export default function RequestsManagement() {
     const [filterUrgency, setFilterUrgency] = useState("all");
     const [filterBloodType, setFilterBloodType] = useState("all");
 
-    // Show loading state while data is being fetched
     if (donationRequests === undefined) {
         return (
             <Card className="border-0 shadow-lg">
@@ -52,7 +51,6 @@ export default function RequestsManagement() {
         );
     }
 
-    // Handle empty requests array
     if (!donationRequests || donationRequests.length === 0) {
         return (
             <Card className="border-0 shadow-lg">
@@ -73,7 +71,6 @@ export default function RequestsManagement() {
         );
     }
 
-    // Filter requests based on status, urgency, and blood type
     const filteredRequests = donationRequests.filter((request) => {
         const matchesStatus =
             filterStatus === "all" ||

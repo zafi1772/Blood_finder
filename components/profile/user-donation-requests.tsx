@@ -8,16 +8,20 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { getUrgencyIcon } from "@/components/others/extras";
 import { getFormattedDateTime, getStatusColor } from "@/lib/utils";
 
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 export default function UserDonationRequests() {
     const data = useQuery(api.donationRequests.getUserMadeDonationRequests);
+    const updateDonationRequestStatus = useMutation(
+        api.donationRequests.updateDonationRequestStatus
+    );
 
     if (!data) {
         return <div>Loading...</div>;
@@ -76,10 +80,59 @@ export default function UserDonationRequests() {
                                     <span className="text-muted-foreground">
                                         Urgency: {request.urgencyLevel}
                                     </span>
-                                    <span className="text-primary font-medium">
+                                    <span className={"text-primary font-medium"}>
                                         {data.requestResponses[request._id]}{" "}
                                         responses
                                     </span>
+                                </div>
+                                <div className="mt-4 flex max-sm:flex-col gap-2">
+                                    {data.requestResponses[request._id] > 0 && (
+                                        <Button
+                                            size="sm"
+                                            className="flex-1"
+                                            variant="secondary"
+                                        >
+                                            <MessageSquare className="h-4 w-4 mr-1" />
+                                            Chat
+                                        </Button>
+                                    )}
+                                    {request.requestStatus !== "Fulfilled" && request.requestStatus !== "Cancelled" && (
+                                        <Button
+                                            size="sm"
+                                            className="flex-1"
+                                            onClick={async () => {
+                                                await updateDonationRequestStatus(
+                                                    {
+                                                        requestId: request._id,
+                                                        newStatus: "Cancelled",
+                                                    }
+                                                );
+                                            }}
+                                        >
+                                            <XCircle className="h-4 w-4 mr-1" />
+                                            Cancel
+                                        </Button>
+                                    )}
+                                    {request.requestStatus !== "Active" &&
+                                        request.requestStatus !==
+                                            "Fulfilled" && (
+                                            <Button
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={async () => {
+                                                    await updateDonationRequestStatus(
+                                                        {
+                                                            requestId:
+                                                                request._id,
+                                                            newStatus: "Active",
+                                                        }
+                                                    );
+                                                }}
+                                            >
+                                                <XCircle className="h-4 w-4 mr-1" />
+                                                Reactivate
+                                            </Button>
+                                        )}
                                 </div>
                             </div>
                         ))}

@@ -258,7 +258,8 @@ const Actions = ({ request }: { request: DonationRequest }) => {
                 >
                     Copy request ID
                 </DropdownMenuItem>
-                {request.requestStatus === "Active" && (
+                {(request.requestStatus === "Active" ||
+                    request.requestStatus === "Cancelled") && (
                     <DropdownMenuItem
                         onClick={() =>
                             updateRequestStatus({
@@ -270,7 +271,8 @@ const Actions = ({ request }: { request: DonationRequest }) => {
                         Mark as fulfilled
                     </DropdownMenuItem>
                 )}
-                {request.requestStatus === "Fulfilled" && (
+                {(request.requestStatus === "Fulfilled" ||
+                    request.requestStatus === "Cancelled") && (
                     <DropdownMenuItem
                         onClick={() =>
                             updateRequestStatus({
@@ -282,16 +284,18 @@ const Actions = ({ request }: { request: DonationRequest }) => {
                         Mark as active
                     </DropdownMenuItem>
                 )}
-                <DropdownMenuItem
-                    onClick={() =>
-                        updateRequestStatus({
-                            requestId: request._id,
-                            newStatus: "Cancelled",
-                        })
-                    }
-                >
-                    Mark as cancelled
-                </DropdownMenuItem>
+                {request.requestStatus !== "Cancelled" && (
+                    <DropdownMenuItem
+                        onClick={() =>
+                            updateRequestStatus({
+                                requestId: request._id,
+                                newStatus: "Cancelled",
+                            })
+                        }
+                    >
+                        Mark as cancelled
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     );

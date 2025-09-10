@@ -94,3 +94,63 @@ export const createDonationRequestToDonor = mutation({
         }
     },
 });
+
+export const updateDonationStatus = mutation({
+    args: {
+        donationRequestToDonorId: v.id("donationRequestsToDonors"),
+        newStatus: v.union(
+            v.literal("Fulfilled"),
+            v.literal("Cancelled"),
+            v.literal("Pending")
+        ),
+    },
+    handler: async (ctx, { donationRequestToDonorId, newStatus }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return false;
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (!user) {
+            return false;
+        }
+
+        const donationRequestToDonor = await ctx.db
+            .query("donationRequestsToDonors")
+            .withIndex("by_id", (q) => q.eq("_id", donationRequestToDonorId))
+            .first();
+        if (!donationRequestToDonor) {
+            return false;
+        }
+        if (donationRequestToDonor.donorId !== user._id && !user.isAdmin) {
+            return false;
+        }
+
+        try {
+            if (newStatus === "Fulfilled") {
+                await ctx.db.patch(donationRequestToDonorId, {
+                    donationStatus: newStatus,
+                    donationTime: Date.now(),
+                });
+
+                await ctx.db.patch(donationRequestToDonor.requestId, {
+                    requestStatus: newStatus,
+                });
+            } else {
+                await ctx.db.patch(donationRequestToDonorId, {
+                    donationStatus: newStatus,
+                });
+            }
+
+            return true;
+        } catch (error) {
+            console.error("[Error updating donation status]", error);
+            return false;
+        }
+    },
+});

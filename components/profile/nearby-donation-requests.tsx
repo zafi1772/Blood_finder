@@ -39,28 +39,9 @@ export default function NearbyDonationRequests() {
     const createNewDonationRequestToDonor = useMutation(
         api.donationRequestsToDonors.createDonationRequestToDonor
     );
-
-    async function handleAcceptRequest(
-        requestId: Id<"donationRequests">,
-        responseStatus: "Accepted" | "Declined"
-    ) {
-        setIsLoading(true);
-
-        const res = await createNewDonationRequestToDonor({
-            requestId,
-            requestResponseStatus: responseStatus,
-        });
-        if (res) {
-            showToast({ title: `Donation Request ${responseStatus}` });
-        } else {
-            showToast({
-                title: "Failed to Respond to Donation Request",
-                isWarning: true,
-            });
-        }
-
-        setIsLoading(false);
-    }
+    const updateDonationStatus = useMutation(
+        api.donationRequestsToDonors.updateDonationStatus
+    );
 
     useEffect(() => {
         const fetchNearbyRequests = async (
@@ -87,6 +68,57 @@ export default function NearbyDonationRequests() {
             );
         }
     }, [user, searchRadius]);
+
+    async function handleAcceptRequest(
+        requestId: Id<"donationRequests">,
+        responseStatus: "Accepted" | "Declined"
+    ) {
+        setIsLoading(true);
+
+        const res = await createNewDonationRequestToDonor({
+            requestId,
+            requestResponseStatus: responseStatus,
+        });
+        if (res) {
+            showToast({ title: `Donation Request ${responseStatus}` });
+        } else {
+            showToast({
+                title: "Failed to Respond to Donation Request",
+                isWarning: true,
+            });
+        }
+
+        setIsLoading(false);
+    }
+
+    async function handleDonationStatusUpdate(
+        newStatus: "Fulfilled" | "Cancelled" | "Pending",
+        donationRequestToDonorId?: Id<"donationRequestsToDonors">
+    ) {
+        setIsLoading(true);
+
+        if (donationRequestToDonorId) {
+            const res = await updateDonationStatus({
+                donationRequestToDonorId,
+                newStatus,
+            });
+            if (res) {
+                showToast({ title: `Donation Status Updated to ${newStatus}` });
+            } else {
+                showToast({
+                    title: "Failed to Update Donation Status",
+                    isWarning: true,
+                });
+            }
+        } else {
+            showToast({
+                title: "Failed to Update Donation Status",
+                isWarning: true,
+            });
+        }
+
+        setIsLoading(false);
+    }
 
     if (!nearbyRequestData || !user || !searchRadius) {
         return <div>Loading...</div>;
@@ -159,7 +191,7 @@ export default function NearbyDonationRequests() {
                                     requestResponseStatus.some(
                                         (res) => res.requestId === request._id
                                     ) ? (
-                                        <div className="flex gap-2">
+                                        <div className="flex max-sm:flex-col gap-2">
                                             <Button
                                                 size="sm"
                                                 className="flex-1"
@@ -167,6 +199,40 @@ export default function NearbyDonationRequests() {
                                             >
                                                 <MessageSquare className="h-4 w-4 mr-1" />
                                                 Chat
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={() =>
+                                                    handleDonationStatusUpdate(
+                                                        "Cancelled",
+                                                        requestResponseStatus.find(
+                                                            (res) =>
+                                                                res.requestId ===
+                                                                request._id
+                                                        )?._id
+                                                    )
+                                                }
+                                            >
+                                                <XCircle className="h-4 w-4 mr-1" />
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={() =>
+                                                    handleDonationStatusUpdate(
+                                                        "Fulfilled",
+                                                        requestResponseStatus.find(
+                                                            (res) =>
+                                                                res.requestId ===
+                                                                request._id
+                                                        )?._id
+                                                    )
+                                                }
+                                            >
+                                                <CheckCircle className="h-4 w-4 mr-1" />
+                                                Mark Fulfilled
                                             </Button>
                                         </div>
                                     ) : (

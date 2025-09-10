@@ -153,7 +153,7 @@ export const getStatusColorVariant = (
 ): "destructive" | "default" | "secondary" | "outline" => {
     switch (status) {
         case "Active":
-            return "default";
+            return "outline";
         case "Fulfilled":
             return "secondary";
         case "Cancelled":

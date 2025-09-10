@@ -79,7 +79,12 @@ export const getDonationRequestsByIds = query({
         const declinedRequests = await ctx.db
             .query("donationRequestsToDonors")
             .withIndex("indexDonorId", (q) => q.eq("donorId", userId))
-            .filter((q) => q.eq(q.field("requestResponseStatus"), "Declined"))
+            .filter((q) =>
+                q.or(
+                    q.eq(q.field("requestResponseStatus"), "Declined"),
+                    q.eq(q.field("donationStatus"), "Cancelled")
+                )
+            )
             .collect();
 
         const requests = (
@@ -88,8 +93,12 @@ export const getDonationRequestsByIds = query({
                     ctx.db
                         .query("donationRequests")
                         .withIndex("by_id", (q) => q.eq("_id", id))
-                        .filter((q) => q.neq(q.field("receiverId"), userId))
-                        .filter((q) => q.eq(q.field("requestStatus"), "Active"))
+                        .filter((q) =>
+                            q.and(
+                                q.neq(q.field("receiverId"), userId),
+                                q.eq(q.field("requestStatus"), "Active")
+                            )
+                        )
                         .first()
                 )
             )
@@ -114,14 +123,16 @@ export const getDonationRequestsByIds = query({
                         .withIndex("indexRequestId", (q) =>
                             q.eq("requestId", req._id)
                         )
+                        .filter((q) => q.eq(q.field("donorId"), userId))
                         .first()
                 )
             )
         )
             .filter((res) => res !== null)
-            .map((res) => ({
-                requestId: res.requestId,
-                requestResponseStatus: res.requestResponseStatus,
+            .map(({ _id, requestId, requestResponseStatus }) => ({
+                _id,
+                requestId,
+                requestResponseStatus,
             }));
 
         return { requests, userNames, requestResponseStatus };
@@ -305,6 +316,10 @@ export const updateDonationRequestStatus = mutation({
 
         const request = await ctx.db.get(requestId);
         if (!request || (!user.isAdmin && request.receiverId !== user._id)) {
+            return false;
+        }
+
+        if (request.requestStatus === "Fulfilled" && !user.isAdmin) {
             return false;
         }
 

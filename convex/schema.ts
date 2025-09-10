@@ -75,7 +75,11 @@ export const DonationRequestToDonor = {
         v.literal("Rejected"),
         v.literal("Declined")
     ),
-    donationStatus: v.union(v.literal("Fulfilled"), v.literal("Pending")),
+    donationStatus: v.union(
+        v.literal("Fulfilled"),
+        v.literal("Pending"),
+        v.literal("Cancelled")
+    ),
     donationTime: v.optional(v.number()),
 };
 
