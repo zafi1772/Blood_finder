@@ -12,6 +12,10 @@ const DONATION_REQUEST_LOCATIONS_KEY = "donation_request_locations";
 export async function addUserLocations(
     userLocations: { _id: string; longitude: number; latitude: number }[]
 ) {
+    if (userLocations.length === 0) {
+        return true;
+    }
+
     const token = await getAuthToken();
     if (!token) {
         return false;
@@ -32,7 +36,7 @@ export async function addUserLocations(
         );
         return true;
     } catch (error) {
-        console.error("Error adding user location to Redis:", error);
+        console.error("[Error adding user location to Redis]", error);
         return false;
     }
 }
@@ -61,7 +65,7 @@ export async function getNearbyUsers(
         );
         return users;
     } catch (error) {
-        console.error("Error fetching nearby users from Redis:", error);
+        console.error("[Error fetching nearby users from Redis]", error);
         return [];
     }
 }
@@ -73,6 +77,10 @@ export async function addDonationRequestLocations(
         latitude: number;
     }[]
 ) {
+    if (donationRequestLocations.length === 0) {
+        return true;
+    }
+
     const token = await getAuthToken();
     if (!token) {
         return false;
@@ -94,7 +102,7 @@ export async function addDonationRequestLocations(
         return true;
     } catch (error) {
         console.error(
-            "Error adding donation request location to Redis:",
+            "[Error adding donation request location to Redis]",
             error
         );
         return false;
@@ -125,7 +133,7 @@ export async function getNearbyDonationRequests(
         )) as Id<"donationRequests">[];
     } catch (error) {
         console.error(
-            "Error fetching nearby donation requests from Redis:",
+            "[Error fetching nearby donation requests from Redis]",
             error
         );
         return [];
