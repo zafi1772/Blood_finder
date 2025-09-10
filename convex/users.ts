@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { User } from "./schema";
 import { mutation, query } from "./_generated/server";
 
 export const getUserExistence = query({
@@ -220,9 +219,46 @@ export const getAddressCoordinatesOfAllUsers = query({
 
 export const createUser = mutation({
     args: {
-        userData: User,
+        fullName: v.string(),
+        phoneNumber: v.string(),
+        addressText: v.object({
+            house: v.optional(v.string()),
+            road: v.optional(v.string()),
+            block: v.optional(v.string()),
+            area: v.optional(v.string()),
+            zip: v.string(),
+            district: v.string(),
+            division: v.string(),
+        }),
+        addressCoordinate: v.object({
+            latitude: v.number(),
+            longitude: v.number(),
+        }),
+        bloodType: v.union(
+            v.literal("A+"),
+            v.literal("A-"),
+            v.literal("B+"),
+            v.literal("B-"),
+            v.literal("AB+"),
+            v.literal("AB-"),
+            v.literal("O+"),
+            v.literal("O-")
+        ),
+        nid: v.string(),
+        isDonating: v.boolean(),
     },
-    handler: async (ctx, { userData }) => {
+    handler: async (
+        ctx,
+        {
+            fullName,
+            phoneNumber,
+            addressText,
+            addressCoordinate,
+            bloodType,
+            nid,
+            isDonating,
+        }
+    ) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
             return { id: null, success: false };
@@ -245,8 +281,17 @@ export const createUser = mutation({
 
         try {
             const userDataWithCorrectEmail = {
-                ...userData,
+                fullName,
                 email: identity.email as string,
+                phoneNumber,
+                addressText,
+                addressCoordinate,
+                bloodType,
+                nid,
+                isDonating,
+                isAdmin: false,
+                isActive: true,
+                accountStatus: true,
             };
 
             const id = await ctx.db.insert("users", userDataWithCorrectEmail);

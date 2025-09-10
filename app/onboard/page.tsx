@@ -182,14 +182,13 @@ export default function OnboardPage() {
             }
 
             const res = await createUser({
-                userData: {
-                    ...data,
-                    email: userEmail,
-                    isAdmin: false,
-                    isDonating: false,
-                    isActive: true,
-                    accountStatus: true,
-                },
+                fullName: data.fullName,
+                phoneNumber: data.phoneNumber,
+                addressText: data.addressText,
+                addressCoordinate: data.addressCoordinate,
+                bloodType: data.bloodType,
+                nid: data.nid,
+                isDonating: true,
             });
 
             if (res.success && res.id) {
