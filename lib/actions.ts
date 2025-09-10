@@ -160,6 +160,11 @@ export async function syncLocations() {
             ),
         ]);
 
+        await Promise.all([
+            redisClient.del(USER_LOCATIONS_KEY),
+            redisClient.del(DONATION_REQUEST_LOCATIONS_KEY),
+        ]);
+
         return (
             await Promise.all([
                 addUserLocations(userLocations),
