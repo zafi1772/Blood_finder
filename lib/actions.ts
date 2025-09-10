@@ -45,7 +45,7 @@ export async function getNearbyUsers(
 ) {
     const token = await getAuthToken();
     if (!token) {
-        return false;
+        return [];
     }
 
     if (redisClient.isOpen === false) {
@@ -109,7 +109,7 @@ export async function getNearbyDonationRequests(
 ) {
     const token = await getAuthToken();
     if (!token) {
-        return false;
+        return [];
     }
 
     if (redisClient.isOpen === false) {

@@ -29,7 +29,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { MapPin, Loader2 } from "lucide-react";
 import { Heart, Users, Shield, Phone, Search, Zap } from "lucide-react";
-import Navbar from "@/components/home/navbar";
 
 export default function BloodFinderLandingPage() {
     const [isLocationLoading, setIsLocationLoading] = useState(false);
