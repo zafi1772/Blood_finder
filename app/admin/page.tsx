@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RecentActivity from "@/components/admin/recent-activity";
@@ -16,9 +17,32 @@ import {
     BarChart3,
     Settings,
 } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import Loader from "@/components/others/loader";
 
 export default function AdminDashboard() {
+    const user = useQuery(api.users.getUserProfileData);
     const [activeTab, setActiveTab] = useState("overview");
+    const router = useRouter();
+
+    useEffect(() => {
+        if (user === undefined) {
+            return;
+        }
+        
+        if (user == null || !user.exists || !user.isAdmin) {
+            router.push("/");
+        }
+    }, [user, router]);
+
+    if (user === undefined) {
+        return <Loader title="Loading admin panel..." />;
+    }
+
+    if (!user || !user.isAdmin) {
+        return <Loader title="Redirecting..." />;
+    }
 
     return (
         <div>

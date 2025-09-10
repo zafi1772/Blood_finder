@@ -5,17 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { redirect } from "next/navigation";
 
 export default function Overview() {
     const overviewData = useQuery(api.users.getAdminOverviewData);
 
-    if (overviewData === undefined) {
+    if (!overviewData) {
         return <div>Loading...</div>;
-    }
-
-    if (overviewData === null) {
-        return redirect("/");
     }
 
     const {

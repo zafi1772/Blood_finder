@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { History, MessageSquare, User, Edit } from "lucide-react";
 import ProfileTab from "@/components/profile/profile-tab";
@@ -11,23 +11,31 @@ import Loader from "@/components/others/loader";
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import ProfileHeader from "@/components/profile/profile-header";
 
 export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState("profile");
     const user = useQuery(api.users.getUserProfileData);
+    const router = useRouter();
 
-    if (user === null) {
-        redirect("/");
-    }
+    useEffect(() => {
+        if (user === null) {
+            router.push("/");
+            return;
+        }
 
-    if (user && !user.exists) {
-        redirect("/onboard");
-    }
+        if (user && !user.exists) {
+            router.push("/onboard");
+        }
+    }, [user, router]);
 
     if (user === undefined) {
         return <Loader title="Loading Profile..." />;
+    }
+
+    if (user === null || (user && !user.exists)) {
+        return <Loader title="Redirecting..." />;
     }
 
     return (
