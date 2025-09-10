@@ -18,7 +18,7 @@ export default function RecentActivity() {
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                <Card className="admin-card border-0 shadow-lg">
+                <Card className="border-0 shadow-lg">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Activity className="w-5 h-5 text-primary" />
@@ -88,7 +88,7 @@ export default function RecentActivity() {
                     </CardContent>
                 </Card>
 
-                <Card className="admin-card border-0 shadow-lg">
+                <Card className="border-0 shadow-lg">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <AlertTriangle className="w-5 h-5 text-chart-4" />
@@ -138,7 +138,7 @@ export default function RecentActivity() {
                     </CardContent>
                 </Card>
 
-                <Card className="admin-card border-0 shadow-lg">
+                <Card className="border-0 shadow-lg">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <TrendingUp className="w-5 h-5 text-chart-3" />

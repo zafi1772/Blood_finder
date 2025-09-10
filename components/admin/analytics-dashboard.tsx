@@ -27,7 +27,7 @@ export default function AnalyticsDashboard() {
         <div className="space-y-6">
             {/* Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <Card className="admin-card border-0 shadow-lg">
+                <Card className="border-0 shadow-lg">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -43,7 +43,7 @@ export default function AnalyticsDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card className="admin-card border-0 shadow-lg">
+                <Card className="border-0 shadow-lg">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -59,7 +59,7 @@ export default function AnalyticsDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card className="admin-card border-0 shadow-lg">
+                <Card className="border-0 shadow-lg">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -75,7 +75,7 @@ export default function AnalyticsDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card className="admin-card border-0 shadow-lg">
+                <Card className="border-0 shadow-lg">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -95,7 +95,7 @@ export default function AnalyticsDashboard() {
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Donation Trends Chart */}
-                <Card className="admin-card border-0 shadow-lg">
+                <Card className="border-0 shadow-lg">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <BarChart3 className="w-5 h-5" />
@@ -118,7 +118,7 @@ export default function AnalyticsDashboard() {
                 </Card>
 
                 {/* Blood Type Distribution */}
-                <Card className="admin-card border-0 shadow-lg">
+                <Card className="border-0 shadow-lg">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <PieChart className="w-5 h-5" />
@@ -205,7 +205,7 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* Geographic Distribution */}
-            <Card className="admin-card border-0 shadow-lg">
+            <Card className="border-0 shadow-lg">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <MapPin className="w-5 h-5" />
@@ -295,7 +295,7 @@ export default function AnalyticsDashboard() {
             </Card>
 
             {/* Reports Section */}
-            <Card className="admin-card border-0 shadow-lg">
+            <Card className="border-0 shadow-lg">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <FileText className="w-5 h-5" />
@@ -357,7 +357,7 @@ export default function AnalyticsDashboard() {
             </Card>
 
             {/* Recent Activity */}
-            <Card className="admin-card border-0 shadow-lg">
+            <Card className="border-0 shadow-lg">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Activity className="w-5 h-5" />

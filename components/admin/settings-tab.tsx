@@ -72,7 +72,7 @@ export default function SettingsTab() {
 
     return (
         <div className="space-y-8">
-            <Card className="admin-card border-0 shadow-lg">
+            <Card className="border-0 shadow-lg">
                 <CardHeader>
                     <div className="flex items-start gap-4">
                         <div className="bg-primary/10 p-3 rounded-lg">

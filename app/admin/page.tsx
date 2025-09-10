@@ -17,79 +17,6 @@ import {
     Settings,
 } from "lucide-react";
 
-const users = [
-    {
-        id: 1,
-        name: "Sarah Johnson",
-        email: "sarah.johnson@email.com",
-        phone: "+1 (555) 123-4567",
-        bloodType: "O+",
-        type: "donor",
-        status: "verified",
-        location: "New York, NY",
-        joinDate: "2024-01-15",
-        lastDonation: "2024-02-20",
-        totalDonations: 5,
-        avatar: "SJ",
-    },
-    {
-        id: 2,
-        name: "Michael Chen",
-        email: "michael.chen@email.com",
-        phone: "+1 (555) 234-5678",
-        bloodType: "AB-",
-        type: "donor",
-        status: "pending",
-        location: "Los Angeles, CA",
-        joinDate: "2024-02-10",
-        lastDonation: null,
-        totalDonations: 0,
-        avatar: "MC",
-    },
-    {
-        id: 3,
-        name: "Emily Rodriguez",
-        email: "emily.rodriguez@email.com",
-        phone: "+1 (555) 345-6789",
-        bloodType: "A+",
-        type: "recipient",
-        status: "verified",
-        location: "Chicago, IL",
-        joinDate: "2024-01-20",
-        lastDonation: null,
-        totalDonations: 0,
-        avatar: "ER",
-    },
-    {
-        id: 4,
-        name: "David Wilson",
-        email: "david.wilson@email.com",
-        phone: "+1 (555) 456-7890",
-        bloodType: "B+",
-        type: "donor",
-        status: "suspended",
-        location: "Houston, TX",
-        joinDate: "2023-12-05",
-        lastDonation: "2024-01-10",
-        totalDonations: 3,
-        avatar: "DW",
-    },
-    {
-        id: 5,
-        name: "Lisa Thompson",
-        email: "lisa.thompson@email.com",
-        phone: "+1 (555) 567-8901",
-        bloodType: "O-",
-        type: "donor",
-        status: "verified",
-        location: "Phoenix, AZ",
-        joinDate: "2024-02-01",
-        lastDonation: "2024-02-25",
-        totalDonations: 2,
-        avatar: "LT",
-    },
-];
-
 const donationRequests = [
     {
         id: 1,
@@ -240,7 +167,7 @@ export default function AdminDashboard() {
 
                     {/* Users Tab */}
                     <TabsContent value="users">
-                        <UsersManagement users={users} />
+                        <UsersManagement />
                     </TabsContent>
 
                     {/* Requests Tab */}

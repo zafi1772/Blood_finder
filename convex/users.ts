@@ -190,6 +190,27 @@ export const getAdminOverviewData = query({
     },
 });
 
+export const getAllUsers = query({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return [];
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (user === null || !user.isAdmin) {
+            return [];
+        }
+
+        return await ctx.db.query("users").collect();
+    },
+});
+
 export const getAddressCoordinatesOfAllUsers = query({
     handler: async (ctx) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -391,6 +412,82 @@ export const updateDonationStatus = mutation({
             return true;
         } catch (error) {
             console.error("[User Donation Status Update Error]", error);
+            return false;
+        }
+    },
+});
+
+export const updateUserAdminStatus = mutation({
+    args: {
+        userId: v.id("users"),
+        makeAdmin: v.boolean(),
+    },
+    handler: async (ctx, { userId, makeAdmin }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return false;
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (user === null || !user.isAdmin) {
+            return false;
+        }
+
+        const userToUpdate = await ctx.db.get(userId);
+        if (userToUpdate === null) {
+            return false;
+        }
+
+        try {
+            await ctx.db.patch(userId, {
+                isAdmin: makeAdmin,
+            });
+            return true;
+        } catch (error) {
+            console.error("[User Admin Status Update Error]", error);
+            return false;
+        }
+    },
+});
+
+export const updateUserAccountStatus = mutation({
+    args: {
+        userId: v.id("users"),
+        suspend: v.boolean(),
+    },
+    handler: async (ctx, { userId, suspend }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return false;
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (user === null || !user.isAdmin) {
+            return false;
+        }
+
+        const userToUpdate = await ctx.db.get(userId);
+        if (userToUpdate === null) {
+            return false;
+        }
+
+        try {
+            await ctx.db.patch(userId, {
+                accountStatus: !suspend,
+            });
+            return true;
+        } catch (error) {
+            console.error("[User Account Suspension Error]", error);
             return false;
         }
     },

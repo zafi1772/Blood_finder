@@ -104,7 +104,7 @@ export default function RequestsManagement({
     });
 
     return (
-        <Card className="admin-card border-0 shadow-lg">
+        <Card className="border-0 shadow-lg">
             <CardHeader>
                 <CardTitle>Donation Requests</CardTitle>
                 <CardDescription>

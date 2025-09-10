@@ -31,7 +31,7 @@ export default function Overview() {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="metric-card admin-card border-0 shadow-lg">
+            <Card className="metric-card border-0 shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                         Total Users
@@ -51,7 +51,7 @@ export default function Overview() {
                 </CardContent>
             </Card>
 
-            <Card className="metric-card admin-card border-0 shadow-lg">
+            <Card className="metric-card border-0 shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                         Active Donors
@@ -71,7 +71,7 @@ export default function Overview() {
                 </CardContent>
             </Card>
 
-            <Card className="metric-card admin-card border-0 shadow-lg">
+            <Card className="metric-card border-0 shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                         Blood Requests
@@ -89,7 +89,7 @@ export default function Overview() {
                 </CardContent>
             </Card>
 
-            <Card className="metric-card admin-card border-0 shadow-lg">
+            <Card className="metric-card border-0 shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                         Total Donations
