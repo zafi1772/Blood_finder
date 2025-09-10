@@ -155,6 +155,52 @@ export const getAllDonationRequestCoordinates = query({
     },
 });
 
+export const getAllDonationRequests = query({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return [];
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (user === null || !user.isAdmin) {
+            return [];
+        }
+
+        const requests = await ctx.db.query("donationRequests").collect();
+        const userNames = (
+            await Promise.all(requests.map((req) => ctx.db.get(req.receiverId)))
+        ).filter((user) => user !== null);
+        const responses = await Promise.all(
+            requests.map((req) =>
+                ctx.db
+                    .query("donationRequestsToDonors")
+                    .withIndex("indexRequestId", (q) =>
+                        q.eq("requestId", req._id)
+                    )
+                    .filter((q) =>
+                        q.neq(q.field("requestResponseStatus"), "Declined")
+                    )
+                    .collect()
+                    .then((res) => res.length)
+            )
+        );
+
+        return requests.map((req, index) => ({
+            ...req,
+            userName: userNames[index]?.fullName || "Unknown",
+            email: userNames[index]?.email || "Unknown",
+            phoneNumber: userNames[index]?.phoneNumber || "Unknown",
+            totalResponses: responses[index],
+        }));
+    },
+});
+
 export const createDonationRequest = mutation({
     args: {
         bloodType: v.union(
@@ -228,6 +274,46 @@ export const createDonationRequest = mutation({
         } catch (error) {
             console.error("[Create Donation Request Error]", error);
             return { id: null, success: false };
+        }
+    },
+});
+
+export const updateDonationRequestStatus = mutation({
+    args: {
+        requestId: v.id("donationRequests"),
+        newStatus: v.union(
+            v.literal("Active"),
+            v.literal("Cancelled"),
+            v.literal("Fulfilled")
+        ),
+    },
+    handler: async (ctx, { requestId, newStatus }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return false;
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) =>
+                q.eq("email", identity.email as string)
+            )
+            .first();
+        if (user === null) {
+            return false;
+        }
+
+        const request = await ctx.db.get(requestId);
+        if (!request || (!user.isAdmin && request.receiverId !== user._id)) {
+            return false;
+        }
+
+        try {
+            await ctx.db.patch(requestId, { requestStatus: newStatus });
+            return true;
+        } catch (error) {
+            console.error("[Update Donation Request Status Error]", error);
+            return false;
         }
     },
 });

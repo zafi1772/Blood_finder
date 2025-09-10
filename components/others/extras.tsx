@@ -131,6 +131,38 @@ export const getRequestStatusBadge = (status: string) => {
     }
 };
 
+export const getUrgencyColorVariant = (
+    urgency: string
+): "destructive" | "default" | "secondary" | "outline" => {
+    switch (urgency) {
+        case "Critical":
+            return "destructive";
+        case "High":
+            return "default";
+        case "Medium":
+            return "secondary";
+        case "Low":
+            return "outline";
+        default:
+            return "outline";
+    }
+};
+
+export const getStatusColorVariant = (
+    status: string
+): "destructive" | "default" | "secondary" | "outline" => {
+    switch (status) {
+        case "Active":
+            return "default";
+        case "Fulfilled":
+            return "secondary";
+        case "Cancelled":
+            return "destructive";
+        default:
+            return "outline";
+    }
+};
+
 export const showToast = ({
     title,
     description,

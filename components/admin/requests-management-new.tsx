@@ -19,12 +19,12 @@ import { Droplets, Zap, Activity } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { DataTable } from "@/components/ui/data-table";
-import { columns } from "./requests-columns";
+import { columns, type DonationRequest } from "./requests-columns";
 
 export default function RequestsManagement() {
     const donationRequests = useQuery(
         api.donationRequests.getAllDonationRequests
-    );
+    ) as DonationRequest[] | undefined;
     const [filterStatus, setFilterStatus] = useState("all");
     const [filterUrgency, setFilterUrgency] = useState("all");
     const [filterBloodType, setFilterBloodType] = useState("all");
@@ -154,7 +154,7 @@ export default function RequestsManagement() {
                 <DataTable
                     columns={columns}
                     data={filteredRequests}
-                    searchKey="userName"
+                    searchKey="requesterName"
                     searchPlaceholder="Search by requester name..."
                 />
 
@@ -192,6 +192,72 @@ export default function RequestsManagement() {
                             </span>
                         </div>
                     </div>
+
+                    {/* Urgency Level Distribution */}
+                    {filterUrgency === "all" && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            {["Critical", "High", "Medium", "Low"].map(
+                                (urgency) => {
+                                    const count = donationRequests.filter(
+                                        (r) => r.urgencyLevel === urgency
+                                    ).length;
+                                    const colorClass = {
+                                        Critical:
+                                            "bg-red-100 text-red-800 border-red-200",
+                                        High: "bg-orange-100 text-orange-800 border-orange-200",
+                                        Medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
+                                        Low: "bg-green-100 text-green-800 border-green-200",
+                                    }[urgency];
+                                    return (
+                                        <div
+                                            key={urgency}
+                                            className={`text-center p-3 rounded border ${colorClass}`}
+                                        >
+                                            <div className="font-semibold">
+                                                {urgency}
+                                            </div>
+                                            <div className="text-lg font-bold">
+                                                {count}
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                            )}
+                        </div>
+                    )}
+
+                    {/* Blood Type Distribution */}
+                    {filterBloodType === "all" && (
+                        <div className="grid grid-cols-4 md:grid-cols-8 gap-2 text-xs">
+                            {[
+                                "A+",
+                                "A-",
+                                "B+",
+                                "B-",
+                                "AB+",
+                                "AB-",
+                                "O+",
+                                "O-",
+                            ].map((type) => {
+                                const count = donationRequests.filter(
+                                    (r) => r.bloodType === type
+                                ).length;
+                                return (
+                                    <div
+                                        key={type}
+                                        className="text-center p-2 bg-muted/50 rounded"
+                                    >
+                                        <div className="font-mono font-semibold text-primary">
+                                            {type}
+                                        </div>
+                                        <div className="text-muted-foreground">
+                                            {count}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </CardContent>
         </Card>
