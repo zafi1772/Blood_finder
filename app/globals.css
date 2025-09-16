@@ -137,3 +137,26 @@
     background: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
+
+.better-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent; /* Firefox */
+    -webkit-overflow-scrolling: touch; /* iOS momentum */
+    overscroll-behavior: contain; /* Prevent parent bounce */
+}
+.better-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+.better-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.better-scrollbar::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--foreground) 20%, transparent);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+.better-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--foreground) 35%, transparent);
+}

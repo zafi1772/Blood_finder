@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, Calendar, Heart, MessageSquare, History } from "lucide-react";
-import { getFormattedDateTime } from "@/lib/utils";
+import { getFormattedDateTime, getInitials } from "@/lib/utils";
 
 interface AddressText {
     house?: string;
@@ -42,10 +42,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
                                         className="object-cover"
                                     />
                                     <AvatarFallback className="text-3xl font-semibold bg-gradient-to-br from-primary to-accent text-white">
-                                        {user?.fullName
-                                            ?.split(" ")
-                                            .map((n) => n[0])
-                                            .join("") || "U"}
+                                        {getInitials(user.fullName ?? "Unnamed User")}
                                     </AvatarFallback>
                                 </Avatar>
                             </div>

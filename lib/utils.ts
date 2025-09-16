@@ -92,3 +92,58 @@ export function getDistanceFromLonLatInKm(
     const distance = R * c;
     return distance;
 }
+
+export const getInitials = (name: string) =>
+    name
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase();
+
+export function timeSince(dateIso: string) {
+    const seconds = Math.floor(
+        (Date.now() - new Date(dateIso).getTime()) / 1000
+    );
+    const intervals: [number, string][] = [
+        [60, "s"],
+        [60, "m"],
+        [24, "h"],
+        [7, "d"],
+        [4.34524, "w"],
+        [12, "mo"],
+    ];
+
+    let value = seconds;
+    let unit = "s";
+    for (let i = 0; i < intervals.length; i++) {
+        const [div, u] = intervals[i];
+        if (value < div) {
+            unit = unit;
+            break;
+        }
+        value = Math.floor(value / div);
+        unit = u;
+    }
+    return `${value}${unit} ago`;
+}
+
+export function formatAddress(address: {
+    house?: string;
+    road?: string;
+    block?: string;
+    area?: string;
+    zip: string;
+    district: string;
+    division: string;
+}) {
+    const parts = [];
+    if (address.house) parts.push(address.house);
+    if (address.road) parts.push(address.road);
+    if (address.block) parts.push(address.block);
+    if (address.area) parts.push(address.area);
+    if (address.district) parts.push(address.district);
+    if (address.division) parts.push(address.division);
+    if (address.zip) parts.push(address.zip);
+    return parts.join(", ");
+}

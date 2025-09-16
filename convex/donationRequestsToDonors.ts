@@ -1,6 +1,58 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+export const getAcceptedDonors = query({
+    args: {
+        requestId: v.id("donationRequests"),
+    },
+    handler: async (ctx, { requestId }) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return [];
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("indexEmail", (q) => q.eq("email", identity.email!))
+            .first();
+        if (!user) {
+            return [];
+        }
+
+        const request = await ctx.db.get(requestId);
+        if (!request || request.receiverId !== user._id) {
+            return [];
+        }
+
+        const acceptedRequests = await ctx.db
+            .query("donationRequestsToDonors")
+            .withIndex("indexRequestId", (q) => q.eq("requestId", requestId))
+            .filter((q) => q.eq(q.field("requestResponseStatus"), "Accepted"))
+            .collect();
+        if (acceptedRequests.length === 0) {
+            return [];
+        }
+
+        return (
+            await Promise.all(
+                acceptedRequests.map((req) =>
+                    ctx.db.get(req.donorId).then((donor) =>
+                        donor
+                            ? {
+                                  donorId: donor._id,
+                                  avatarUrl: undefined,
+                                  fullName: donor.fullName,
+                                  phoneNumber: donor.phoneNumber,
+                                  addressText: donor.addressText,
+                              }
+                            : null
+                    )
+                )
+            )
+        ).filter((donor) => donor !== null);
+    },
+});
+
 export const getUserDonationHistory = query({
     handler: async (ctx) => {
         const identity = await ctx.auth.getUserIdentity();

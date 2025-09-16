@@ -103,6 +103,9 @@ export default defineSchema({
     donationRequestsToDonors: defineTable(DonationRequestToDonor)
         .index("indexRequestId", ["requestId"])
         .index("indexDonorId", ["donorId"]),
-    conversations: defineTable(Conversation),
+    conversations: defineTable(Conversation)
+        .index("indexRequestId", ["requestId"])
+        .index("indexSenderId", ["senderId"])
+        .index("indexReceiverId", ["receiverId"]),
     configs: defineTable(Config),
 });

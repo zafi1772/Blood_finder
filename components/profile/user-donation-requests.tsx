@@ -16,6 +16,7 @@ import { getFormattedDateTime, getStatusColor } from "@/lib/utils";
 
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import Link from "next/link";
 
 export default function UserDonationRequests() {
     const data = useQuery(api.donationRequests.getUserMadeDonationRequests);
@@ -80,39 +81,46 @@ export default function UserDonationRequests() {
                                     <span className="text-muted-foreground">
                                         Urgency: {request.urgencyLevel}
                                     </span>
-                                    <span className={"text-primary font-medium"}>
+                                    <span
+                                        className={"text-primary font-medium"}
+                                    >
                                         {data.requestResponses[request._id]}{" "}
                                         responses
                                     </span>
                                 </div>
                                 <div className="mt-4 flex max-sm:flex-col gap-2">
                                     {data.requestResponses[request._id] > 0 && (
-                                        <Button
-                                            size="sm"
+                                        <Link
                                             className="flex-1"
-                                            variant="secondary"
+                                            href={`profile/conversation/${request._id}`}
                                         >
-                                            <MessageSquare className="h-4 w-4 mr-1" />
-                                            Chat
-                                        </Button>
+                                            <div className="w-full inline-flex justify-center items-center h-8 rounded-md gap-1.5 px-3 text-sm border border-primary hover:bg-accent/10 text-primary transition-colors">
+                                                <MessageSquare className="h-4 w-4 mr-1" />
+                                                Chat
+                                            </div>
+                                        </Link>
                                     )}
-                                    {request.requestStatus !== "Fulfilled" && request.requestStatus !== "Cancelled" && (
-                                        <Button
-                                            size="sm"
-                                            className="flex-1"
-                                            onClick={async () => {
-                                                await updateDonationRequestStatus(
-                                                    {
-                                                        requestId: request._id,
-                                                        newStatus: "Cancelled",
-                                                    }
-                                                );
-                                            }}
-                                        >
-                                            <XCircle className="h-4 w-4 mr-1" />
-                                            Cancel
-                                        </Button>
-                                    )}
+                                    {request.requestStatus !== "Fulfilled" &&
+                                        request.requestStatus !==
+                                            "Cancelled" && (
+                                            <Button
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={async () => {
+                                                    await updateDonationRequestStatus(
+                                                        {
+                                                            requestId:
+                                                                request._id,
+                                                            newStatus:
+                                                                "Cancelled",
+                                                        }
+                                                    );
+                                                }}
+                                            >
+                                                <XCircle className="h-4 w-4 mr-1" />
+                                                Cancel
+                                            </Button>
+                                        )}
                                     {request.requestStatus !== "Active" &&
                                         request.requestStatus !==
                                             "Fulfilled" && (

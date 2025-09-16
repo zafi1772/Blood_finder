@@ -23,6 +23,7 @@ import { api } from "@/convex/_generated/api";
 import { useEffect, useState } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { getNearbyDonationRequests } from "@/lib/actions";
+import Link from "next/link";
 
 export default function NearbyDonationRequests() {
     const user = useQuery(api.users.getUserProfileData);
@@ -192,14 +193,15 @@ export default function NearbyDonationRequests() {
                                         (res) => res.requestId === request._id
                                     ) ? (
                                         <div className="flex max-sm:flex-col gap-2">
-                                            <Button
-                                                size="sm"
+                                            <Link
                                                 className="flex-1"
-                                                variant="secondary"
+                                                href={`profile/conversation/${request._id}/${request.receiverId}`}
                                             >
-                                                <MessageSquare className="h-4 w-4 mr-1" />
-                                                Chat
-                                            </Button>
+                                                <div className="w-full inline-flex justify-center items-center h-8 rounded-md gap-1.5 px-3 text-sm border border-primary hover:bg-accent/10 text-primary transition-colors">
+                                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                                    Chat
+                                                </div>
+                                            </Link>
                                             <Button
                                                 size="sm"
                                                 className="flex-1"
